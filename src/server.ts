@@ -15,48 +15,46 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 
-// Create a collection named 'rooms'
-const roomsCollection = db.collection('rooms');
 
-// Test the connection by adding a document
 async function testConnection() {
   try {
-    const docRef = await roomsCollection.add({
-      roomname: 'Test Room',
-      user: 'Test User',
-      token: 'Test Token',
-    });
-    console.log('Document written with ID:', docRef.id);
-  } catch (error) {
-    console.error('Error adding document:', error);
+    const roomsSnapshot = await db.collection('rooms').get();
+    const roomsList = roomsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    console.log('Rooms:', roomsList);
+  } catch (e) {
+    console.error("Error adding document: ", e);
   }
 }
 
 testConnection();
 
 app.prepare().then(() => {
-    const server = express();
-    const httpServer = createServer(server);
-    const io = new Server(httpServer);
+  const server = express();
+  const httpServer = createServer(server);
+  const io = new Server(httpServer);
 
-    // Middleware para lidar com requisições do Next.js
-    server.all('*', (req: Request, res: Response) => {
-        return handle(req, res);
-    });
+  // Middleware para lidar com requisições do Next.js
+  server.all('*', (req: Request, res: Response) => {
+    return handle(req, res);
+  });
 
-    // Configuração do Socket.io
-    io.on('connection', (socket: Socket) => {
+  // Configuração do Socket.io
+  io.on('connection', (socket: Socket) => {
 
-        console.log('Novo cliente conectado', socket.id);
+    console.log('Novo cliente conectado', socket.id);
 
-        handleConnection(socket);
-        handleRoomEvents(socket);
-        handleChatEvents(socket);
-    });
+    handleConnection(socket);
+    handleRoomEvents(socket);
+    handleChatEvents(socket);
+  });
 
-    const PORT = process.env.PORT || port;
-    httpServer.listen(PORT, (err?: Error) => {
-        if (err) throw err;
-        console.log(`> Servidor rodando na porta ${PORT}`);
-    });
+  const PORT = process.env.PORT || port;
+  httpServer.listen(PORT, (err?: Error) => {
+    if (err) throw err;
+    console.log(`> Servidor rodando na porta ${PORT}`);
+  });
 });

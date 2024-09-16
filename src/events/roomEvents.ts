@@ -1,5 +1,5 @@
-import { User } from '@/types/common';
 import { Socket } from 'socket.io';
+import { User } from '../types/common';
 
 const users: { [socketId: string]: User } = {};
 
