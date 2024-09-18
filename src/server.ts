@@ -48,8 +48,8 @@ app.prepare().then(() => {
     console.log('Novo cliente conectado', socket.id);
 
     handleConnection(socket);
-    handleRoomEvents(socket);
-    handleChatEvents(socket);
+    handleRoomEvents(socket, io);
+    handleChatEvents(socket, io);
   });
 
   const PORT = process.env.PORT || port;

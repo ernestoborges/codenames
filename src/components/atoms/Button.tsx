@@ -1,15 +1,18 @@
 export default function Button({
-    name
-}:{
-    name: string
-}){
+    children,
+    onClick
+}: {
+    children: any
+    onClick?: () => any
+}) {
 
     return <>
         <button
             className="bg-green-500 rounded-lg p-1"
             type="button"
+            onClick={onClick}
         >
-            {name}
+            {children}
         </button>
     </>
 }
