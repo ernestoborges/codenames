@@ -3,15 +3,15 @@ import { db } from '../database/firebase';
 import { verifyToken } from '../utils/token';
 
 export const handleChatEvents = (socket: Socket, io: Server) => {
-    socket.on('sendMessage', async ({ roomId, message, token }: { roomId: string; message: string; token: string }) => {
-        
+    socket.on('sendMessage', async ({ message, token }: { message: string; token: string }) => {
+
         const decodedToken = verifyToken(token);
         if (!decodedToken) {
             socket.emit('error', 'Token inválido');
             return;
         }
 
-        const { uuid } = decodedToken;
+        const { uuid, roomId } = decodedToken;
 
         // Verificar se a sala existe
         const roomRef = db.collection('rooms').doc(roomId);

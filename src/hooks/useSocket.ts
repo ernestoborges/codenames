@@ -1,73 +1,45 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 
-type SocketType = Socket | null;
-
 let socket: Socket | null = null;
 
-const useSocket = (roomName: string) => {
+const useSocket = () => {
 
-    // const socketRef = useRef<Socket | null>(null);
-    // const [isConnected, setIsConnected] = useState<boolean>(false);
-
-    // useEffect(() => {
-    //     const savedSocketId = localStorage.getItem('socketId');
-
-    //     if (!socketRef.current) {
-    //         socketRef.current = io('http://localhost:3000', {
-    //             query: { socketId: savedSocketId || undefined },
-    //         });
-
-    //         socketRef.current.on('connect', () => {
-    //             console.log(socketRef.current!.id!);
-    //             localStorage.setItem('socketId', socketRef.current!.id!);
-    //             setIsConnected(true);
-    //         });
-
-    //         socketRef.current.on('disconnect', () => {
-    //             localStorage.removeItem('socketId');
-    //             setIsConnected(false);
-    //         });
-
-    //     }
-
-    //     return () => {
-    //         if (socketRef.current) {
-    //             socketRef.current.disconnect();
-    //             socketRef.current = null;
-    //         }
-    //     };
-    // }, []);
-
-    // return socketRef.current;
-
-    const [connected, setConnected] = useState(false);
-    const [token, setToken] = useState<string | null>(null);
+    const [connected, setConnected] = useState<boolean>(false);
+    const [token, setToken] = useState<string>('');
 
     useEffect(() => {
         const storedToken = localStorage.getItem('token');
         setToken(storedToken);
 
-        socket = io({
-            query: { token: storedToken, roomName },
-        });
+        socket = io();
 
         socket.on('connect', () => {
             setConnected(true);
         });
 
-        socket.on('token', (newToken: string) => {
-            localStorage.setItem('token', newToken);
-        });
+        socket.on('token', (token) => {
+            updateToken(token);
+        })
 
         return () => {
             if (socket) {
                 socket.disconnect();
             }
         };
-    }, [roomName]);
+    }, []);
 
-    return { socket, connected };
+    const updateToken = (newToken: string) => {
+        localStorage.setItem('token', newToken);
+        setToken(newToken);
+    };
+
+    const removeToken = () => {
+        localStorage.removeItem('token');
+        setToken(null);
+    };
+
+    return { socket, connected, token, updateToken, removeToken };
 };
 
 export default useSocket;

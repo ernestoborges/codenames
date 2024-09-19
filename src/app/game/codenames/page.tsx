@@ -1,16 +1,13 @@
 'use client'
-import GameCard from "@/components/atoms/GameCard";
-import GameBoard from "@/components/molecules/GameBoard";
-import GameTable from "@/components/organism/GameTable";
-import useSocket from "@/hooks/useSocket";
-import { RandomWords } from "@/utils/words";
+
+import Lobby from "../../../components/templates/Lobby"
 
 export default function CodenamesMain(){
 
     // const socket = useSocket();
    
     return <>
-        {/* <Lobby /> */}
-        <GameTable />
+        <Lobby />
+        {/* <GameTable /> */}
     </>
 }

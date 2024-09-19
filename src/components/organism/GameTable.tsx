@@ -1,7 +1,7 @@
-import { RandomWords } from "@/utils/words";
+import { RandomWords } from "../../utils/words";
 import GameBoard from "../molecules/GameBoard";
 import { GameTipBar } from "../molecules/GameTipBar";
-import GameTeamSection from "../molecules/GameTeamSection";
+import GameTeamSection from "./GameTeamSection";
 
 export default function GameTable() {
 

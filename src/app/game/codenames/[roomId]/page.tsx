@@ -4,6 +4,9 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import useSocket from '../../../../hooks/useSocket';
 import Button from '../../../../components/atoms/Button';
 import PlayerLabel from '../../../../components/molecules/PlayerLabel';
+import GameTeamSection from '../../../../components/organism/GameTeamSection';
+import Chat from '../../../../components/organism/Chat';
+import GameBoard from '../../../../components/organism/GameBoard';
 
 interface Player {
   id: string;
@@ -13,96 +16,72 @@ interface Player {
   admin: boolean;
 }
 
-interface Message {
-  username: string,
-  message: string,
-  timestamp: string
+interface GameState {
+  turn: number,
+  clue: {
+    word: string,
+    number: number
+  },
+  board: string[]
 }
 
-export default function Room() {
-  const router = useRouter();
-  const { roomId } = useParams();
-  const searchParams = useSearchParams();
 
-  const { socket, connected } = useSocket(roomId[0] || '');
+
+export default function Room() {
+
+  const { roomId } = useParams();
+  const { socket, connected, token, updateToken } = useSocket();
 
   const [roomName, setRoomName] = useState<string>("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [username, setUsername] = useState<string>("");
-  const [chat, setChat] = useState<Message[]>([]);
-  const [message, setMessage] = useState<string>("");
   const [checkin, setCheckin] = useState<boolean>(false);
-  const [isNameRequired, setIsNameRequired] = useState<boolean>(false);
-  const [token, setToken] = useState<string>('');
+  const [gameState, setGameState] = useState<GameState>({
+    turn: 1,
+    clue: {
+      word: '',
+      number: 0
+    },
+    board: []
+  });
 
-  const handleSendMessage = () => {
-    if (socket && message && token) {
-      socket.emit('sendMessage', { roomId, token, message });
-      setMessage('');
-    }
-  }
+  const [spymasterCards, setSpymasterCards] = useState([]);
 
   const handleJoinRoom = () => {
     if (socket && username) {
-      const token = localStorage.getItem('token') || '';
-      setToken(token);
       socket.emit('joinRoom', { playerName: username, roomId, token });
-      // socket.emit('createRoom', { playerName: username, roomName: "testanto2" });
     }
   };
-
-  // useEffect(() => {
-  //   if (socket && checkin) {
-  //     socket.emit('joinRoom', { roomName, playerName: username });
-  //   }
-  // }, [checkin])
 
   useEffect(() => {
     if (connected && socket) {
       socket.on('allowCheckin', (isAllowed: boolean) => {
         setCheckin(isAllowed);
-      });
+      })
 
-      const token = localStorage.getItem('token');
       if (token) {
         socket.emit('joinRoom', { roomId, token });
       }
 
       socket.on('roomState', ({ players, name, gameState }) => {
-        setPlayers(players)
+        setPlayers(players);
         setRoomName(name);
+        setGameState(gameState);
       })
 
-      socket.on('token', (token) => {
-        setToken(token);
-      })
-
-      socket.on('usersInRoom', (users: Player[]) => {
-        console.log("cheguei")
-        setPlayers(users);
-      });
-    }
-  }, [connected, socket]);
-
-  useEffect(() => {
-
-    if (socket && roomId) {
-
-      socket.on('usersInRoom', (users: Player[]) => {
-        setPlayers(users);
+      socket.on('spymasterCards', (cards) => {
+        setSpymasterCards(cards);
       });
 
-      socket.on('receiveMessage', (newMessage: Message) => {
-        setChat((prevChat) => [...prevChat, newMessage]);
-      });
+
 
       return () => {
-        socket.off('usersInRoom');
-        socket.off('chatMessage');
-        // socket.off('allowCheckin');
+        socket.off('roomState');
+        socket.off('receiveMessage');
+        socket.off('allowCheckin');
       };
     }
-  }, [socket, roomId]);
+  }, [connected, socket]);
 
   if (!checkin) {
     return (
@@ -116,6 +95,9 @@ export default function Room() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Sala: {roomName}</h1>
+      <Button onClick={() => socket.emit('restartGame', { token })}>
+        Reiniciar jogo
+      </Button>
       <div className='border-white border flex flex-col p-4'>
         <p>Espectadores</p>
         <ul>
@@ -128,78 +110,19 @@ export default function Room() {
           }
         </ul>
       </div>
-      <div className='border-white border flex flex-col p-4'>
-        <p>Time 1</p>
-        <p>Operative</p>
-        <ul>
-          {
-            players.filter(player => player.team === "1" && player.role === 'operative').map(player =>
-              <li key={player.id}>
-                <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
-              </li>
-            )
-          }
-        </ul>
-        <Button onClick={() => {
-          socket.emit('updateTeam', { token, team: "1", role: 'operative' })
-        }}>Entrar Operative</Button>
-        <p>Spymaster</p>
-        <ul>
-          {
-            players.filter(player => player.team === "1" && player.role === 'spymaster').map(player =>
-              <li key={player.id}>
-                <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
-              </li>
-            )
-          }
-        </ul>
-        <Button onClick={() => {
-          socket.emit('updateTeam', { token, team: "1", role: 'spymaster' })
-        }}>Entrar Spymaster</Button>
+      <div className='flex gap-4 items-start'>
+        <div className='flex flex-col items-center min-w-[15rem] max-w-[20rem] gap-4'>
+          <GameTeamSection players={players} team={1} />
+          <GameTeamSection players={players} team={2} />
+        </div>
+        <div>
+          <GameBoard cards={gameState.board} spymasterCards={spymasterCards} />
+        </div>
+        <div>
+          <Chat />
+        </div>
       </div>
-      <div className='border-white border flex flex-col p-4'>
-        <p>Time 2</p>
-        <p>Operative</p>
-        <ul>
-          {
-            players.filter(player => player.team === "2" && player.role === 'operative').map(player =>
-              <li key={player.id}>
-                <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
-              </li>
-            )
-          }
-        </ul>
-        <Button onClick={() => {
-          socket.emit('updateTeam', { token, team: "2", role: 'operative' })
-        }}>Entrar Operative</Button>
-        <p>Spymaster</p>
-        <ul>
-          {
-            players.filter(player => player.team === "2" && player.role === 'spymaster').map(player =>
-              <li key={player.id}>
-                <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
-              </li>
-            )
-          }
-        </ul>
-        <Button onClick={() => {
-          socket.emit('updateTeam', { token, team: "2", role: 'spymaster' })
-        }}>Entrar Spymaster</Button>
-      </div>
-      <input className='text-black'
-        value={message} onChange={(e) => setMessage(e.target.value)}
-      />
-      <button onClick={handleSendMessage}>Send Message</button>
-      <ul>
-        {
-          chat.map((c, i) =>
-            <li key={i}>
-              <div>{c.username}</div>
-              <div>{c.message}</div>
-            </li>
-          )
-        }
-      </ul>
+
     </div>
   );
 }
