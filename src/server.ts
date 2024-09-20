@@ -6,6 +6,7 @@ import { handleChatEvents } from './events/chatEvents';
 import { handleConnection } from './events/connection';
 import { handleRoomEvents } from './events/roomEvents';
 import { db } from './database/firebase';
+import { handleGameEvents } from './events/gameEvents';
 
 const hostname = "localhost"
 const port = 3000
@@ -50,6 +51,7 @@ app.prepare().then(() => {
     handleConnection(socket);
     handleRoomEvents(socket, io);
     handleChatEvents(socket, io);
+    handleGameEvents(socket, io);
   });
 
   const PORT = process.env.PORT || port;

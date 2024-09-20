@@ -8,6 +8,7 @@ export const generateToken = ({ roomId, username, uuid }: { roomId: string, user
 
 export const verifyToken = (token: string): JwtPayload | null => {
     try {
+        if(!token) return null;
         const decoded = jwt.verify(token, SECRET_KEY);
         if (typeof decoded === 'object') {
             return decoded as JwtPayload;

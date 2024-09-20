@@ -22,9 +22,12 @@ interface GameState {
     word: string,
     number: number
   },
-  board: string[]
+  board: string[],
+  teamsScore: {
+    team1: number,
+    team2: number
+  },
 }
-
 
 
 export default function Room() {
@@ -42,7 +45,11 @@ export default function Room() {
       word: '',
       number: 0
     },
-    board: []
+    board: [],
+    teamsScore: {
+      team1: 0,
+      team2: 0
+    },
   });
 
   const [spymasterCards, setSpymasterCards] = useState([]);
@@ -55,6 +62,7 @@ export default function Room() {
 
   useEffect(() => {
     if (connected && socket) {
+
       socket.on('allowCheckin', (isAllowed: boolean) => {
         setCheckin(isAllowed);
       })
@@ -69,11 +77,9 @@ export default function Room() {
         setGameState(gameState);
       })
 
-      socket.on('spymasterCards', (cards) => {
-        setSpymasterCards(cards);
+      socket.on('spymasterCards', (spymasterData) => {
+        setSpymasterCards(spymasterData.boardAnswers);
       });
-
-
 
       return () => {
         socket.off('roomState');
@@ -99,16 +105,11 @@ export default function Room() {
         Reiniciar jogo
       </Button>
       <div className='border-white border flex flex-col p-4'>
-        <p>Espectadores</p>
-        <ul>
-          {
-            players.filter(player => player.team === "0").map(player =>
-              <li key={player.id}>
-                <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
-              </li>
-            )
-          }
-        </ul>
+        <span>Dicas: {gameState.clue.number}</span>
+      </div>
+      <div className='border-white border flex flex-col p-4'>
+        <p>Time1: {gameState.teamsScore.team1}</p>
+        <p>Time2: {gameState.teamsScore.team2}</p>
       </div>
       <div className='flex gap-4 items-start'>
         <div className='flex flex-col items-center min-w-[15rem] max-w-[20rem] gap-4'>

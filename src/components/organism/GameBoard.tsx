@@ -22,7 +22,7 @@ export default function GameBoard({
         <div className="flex">
             <div className="grid grid-flow-col grid-rows-5 gap-x-4 gap-y-4">
                 {
-                    cards.map((card, i) => <GameCard key={i} title={card.word} color={cardsColor[`${i}`]} />)
+                    cards.map((card, i) => <GameCard key={i} title={card.word} color={cardsColor[`${i}`]} index={card.position} />)
                 }
             </div>
         </div>

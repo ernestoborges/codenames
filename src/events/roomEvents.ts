@@ -34,14 +34,11 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             const currentRoomQuery = await db.collection('rooms').where('players', 'array-contains', { id: uuid }).get();
 
             if (!currentRoomQuery.empty) {
-                // 2. Remover o jogador da sala atual
                 currentRoomQuery.forEach(async (roomDoc) => {
                     const roomData = roomDoc.data();
                     await roomDoc.ref.update({
-                        players: roomData.players.filter((player: any) => player.id !== uuid)
+                        'roomState.players': roomData.roomState.players.filter((player: any) => player.id !== uuid)
                     });
-
-                    // Emitir um evento para os jogadores da sala atual sobre a saída do jogador
                     socket.to(roomDoc.id).emit('roomState', roomData);
                 });
             }
@@ -49,25 +46,30 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         const uniqueCode = uuidv4();
         const newRoom = await roomRef.add({
-            name: roomName,
-            status: 'waiting',
-            players: [{
-                id: uniqueCode,
-                username: playerName,
-                role: 'operative',
-                team: 0,
-                admin: true
-            }],
-            gameState: {
-                turn: 1,
-                clue: {
-                    word: '',
-                    number: 0
+            roomState: {
+                name: roomName,
+                status: 'waiting',
+                players: [{
+                    id: uniqueCode,
+                    username: playerName,
+                    role: 'operative',
+                    team: 0,
+                    admin: true
+                }],
+                gameState: {
+                    turn: 1,
+                    clue: {
+                        word: '',
+                        number: 0
+                    },
+                    board: []
                 },
-                board: []
+                createdAt: admin.firestore.FieldValue.serverTimestamp(),
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
             },
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            spymasterData: {
+                boardAnswers: []
+            }
         });
 
         const roomId = newRoom.id
@@ -77,6 +79,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
     });
 
     socket.on('joinRoom', async ({ roomId, playerName, token }: { roomId: string; playerName: string, token: string }) => {
+        console.log(`${socket.id} pediu para entrar na sala: ${roomId}`)
 
         if (!roomId) {
             socket.emit('error', 'ID da sala não fornecido');
@@ -114,15 +117,15 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         if (decodedToken) {
             const { uuid } = decodedToken;
-            const playerIndex = roomData.players.findIndex((player: any) => player.id === uuid);
+            const playerIndex = roomData.roomState.players.findIndex((player: any) => player.id === uuid);
 
             if (playerIndex !== -1) {
 
-                roomData.players[playerIndex].socket = socket.id
+                roomData.roomState.players[playerIndex].socket = socket.id
 
                 await roomRef.update({
-                    players: roomData.players,
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+                    'roomState.players': roomData.roomState.players,
+                    'roomState.updatedAt': admin.firestore.FieldValue.serverTimestamp(),
                 });
 
                 console.log(`Cliente reconectado: ${uuid}`);
@@ -130,8 +133,8 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
                 socket.emit('allowCheckin', true);
                 socket.emit('token', token)
 
-                io.to(roomId).emit('roomState', roomData);
-                console.log(`${roomData.players[playerIndex].username} entrou na sala ${roomId}`);
+                io.to(roomId).emit('roomState', roomData.roomState);
+                console.log(`${roomData.roomState.players[playerIndex].username} entrou na sala ${roomId}`);
                 return;
             }
         }
@@ -143,7 +146,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             return;
         }
 
-        const nameExists = roomData.players.some((player: any) => player.username === playerName);
+        const nameExists = roomData.roomState.players.some((player: any) => player.username === playerName);
         if (nameExists) {
             console.log(`Nome de jogador já existe na sala: ${playerName}`);
             socket.emit('error', 'Nome de usuário já existe na sala');
@@ -156,14 +159,14 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         try {
             await roomRef.update({
-                players: admin.firestore.FieldValue.arrayUnion({
+                'roomState.players': admin.firestore.FieldValue.arrayUnion({
                     id: newid,
                     username: playerName,
                     role: 'operative',
                     team: 0,
                     socket: socket.id
                 }),
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                'roomState.updatedAt': admin.firestore.FieldValue.serverTimestamp()
             });
         } catch (error) {
             console.error('Erro ao atualizar a sala com novo jogador:', error);
@@ -180,98 +183,8 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         socket.emit('allowCheckin', true);
 
         // socket.emit('roomState', updatedRoomData);
-        io.to(roomId).emit('roomState', updatedRoomData);
+        io.to(roomId).emit('roomState', updatedRoomData.roomState);
         console.log(`${playerName} entrou na sala ${roomId}`);
-    });
-
-    socket.on('changeRole', async ({ token, role }) => {
-
-        if (role !== 'spymaster' && role !== 'operative') {
-            socket.emit('error', `Role inválida: ${role}`);
-            return;
-        }
-
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
-        }
-
-        const { roomId, uuid } = decodedToken;
-
-        const roomRef = db.collection('rooms').doc(roomId);
-        const roomDoc = await roomRef.get();
-
-        if (!roomDoc.exists) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
-
-        const roomData = roomDoc.data();
-        const playerIndex = roomData.players.findIndex((player) => player.id === uuid);
-
-        if (playerIndex === -1) {
-            socket.emit('error', 'Jogador não encontrado');
-            return;
-        }
-
-        // Atualiza a role do jogador
-        roomData.players[playerIndex].role = role;
-
-        // Atualiza o Firestore com a nova role
-        await roomRef.update({
-            players: roomData.players,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // Envia o novo estado da sala para todos os jogadores
-        io.to(roomId).emit('roomState', roomData);
-        console.log(`Jogador ${uuid} alterou sua role para ${role}`);
-    })
-
-    socket.on('changeTeam', async ({ token, team }) => {
-
-        if (team !== 0 && team !== 1 && team !== 2) {
-            socket.emit('error', `Time inválido: ${team}`);
-            return;
-        }
-
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
-        }
-
-        const { roomId, uuid } = decodedToken;
-
-        const roomRef = db.collection('rooms').doc(roomId);
-        const roomDoc = await roomRef.get();
-
-        if (!roomDoc.exists) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
-
-        const roomData = roomDoc.data();
-        const playerIndex = roomData.players.findIndex((player) => player.id === uuid);
-
-        if (playerIndex === -1) {
-            socket.emit('error', 'Jogador não encontrado');
-            return;
-        }
-
-        // Atualiza o time do jogador
-        roomData.players[playerIndex].team = team;
-
-        // Atualiza o Firestore com o novo time
-        await roomRef.update({
-            players: roomData.players,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-        });
-
-        // Envia o novo estado da sala para todos os jogadores
-        io.to(roomId).emit('roomState', roomData);
-        console.log(`Jogador ${uuid} alterou seu time para ${team}`);
     });
 
     socket.on('updateTeam', async ({ token, team, role }) => {
@@ -303,7 +216,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         }
 
         const roomData = roomDoc.data();
-        const playerIndex = roomData.players.findIndex((player) => player.id === uuid);
+        const playerIndex = roomData.roomState.players.findIndex((player) => player.id === uuid);
 
         if (playerIndex === -1) {
             socket.emit('error', 'Jogador não encontrado');
@@ -312,19 +225,19 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         // Atualiza o time do jogador
         if (team)
-            roomData.players[playerIndex].team = team;
+            roomData.roomState.players[playerIndex].team = team;
 
         if (role)
-            roomData.players[playerIndex].role = role;
+            roomData.roomState.players[playerIndex].role = role;
 
         // Atualiza o Firestore com o novo time
         await roomRef.update({
-            players: roomData.players,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+            'roomState.players': roomData.roomState.players,
+            'roomState.updatedAt': admin.firestore.FieldValue.serverTimestamp()
         });
 
         // Envia o novo estado da sala para todos os jogadores
-        io.to(roomId).emit('roomState', roomData);
+        io.to(roomId).emit('roomState', roomData.roomState);
         console.log(`Jogador ${uuid} alterou seu time para ${team} e role para ${role}`);
     });
 
@@ -348,7 +261,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         const roomData = roomDoc.data();
 
-        const player = roomData.players.find((p: any) => p.id === uuid);
+        const player = roomData.roomState.players.find((p: any) => p.id === uuid);
         if (!player) {
             socket.emit('error', 'Jogador não encontrado na sala');
             return;
@@ -380,32 +293,44 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         const boardCards = cards.map(card => ({
             word: card.word,
             position: card.position,
-            hidden: false,
+            hidden: true,
             tips: []
         }))
 
-        roomData.gameState = {
+        roomData.roomState.gameState = {
             turn: timeInicial,
             clue: {
                 word: '',
-                number: 0
+                number: 5
+            },
+            teamsScore: {
+                team1: timeInicial === 1 ? 9 : 8,
+                team2: timeInicial === 1 ? 8 : 9
             },
             board: boardCards
         };
 
-        await roomRef.update({
-            gameState: roomData.gameState,
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
-        });
+        roomData.spymasterData = {
+            boardAnswers: cards
+        }
 
-        const spymasters = roomData.players.filter((p) => p.role === 'spymaster');
-        spymasters.forEach(spymaster => {
-            if (spymaster.socket) {
-                io.to(spymaster.socket).emit('spymasterCards', cards);
+        await roomRef.update({
+            'roomState.gameState': roomData.roomState.gameState,
+            'roomState.updatedAt': admin.firestore.FieldValue.serverTimestamp(),
+            spymasterData: {
+                boardAnswers: roomData.spymasterData.boardAnswers
             }
         });
 
-        io.to(roomId).emit('roomState', roomData);
+        roomData.roomState.players.forEach(player => {
+            if (player.role === 'spymaster' && player.socket) {
+                io.to(player.socket).emit('spymasterCards', roomData.spymasterData);
+            } else if (player.socket) {
+                io.to(player.socket).emit('spymasterCards', {boardAnswers:[]});
+            }
+        });
+
+        io.to(roomId).emit('roomState', roomData.roomState);
         console.log(`Jodo da sala ${roomId} reiniciado`);
     })
 };

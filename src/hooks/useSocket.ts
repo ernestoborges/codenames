@@ -5,18 +5,25 @@ let socket: Socket | null = null;
 
 const useSocket = () => {
 
+    // const [socket, setSocket] = useState<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
     const [token, setToken] = useState<string>('');
 
     useEffect(() => {
+        if (!socket) {
+            socket = io();
+        }
+
         const storedToken = localStorage.getItem('token');
         setToken(storedToken);
-
-        socket = io();
 
         socket.on('connect', () => {
             setConnected(true);
         });
+
+        socket.on('disconnect', () => {
+            setConnected(false);
+        })
 
         socket.on('token', (token) => {
             updateToken(token);
@@ -25,9 +32,10 @@ const useSocket = () => {
         return () => {
             if (socket) {
                 socket.disconnect();
+                socket = null;
             }
         };
-    }, []);
+    }, [socket]);
 
     const updateToken = (newToken: string) => {
         localStorage.setItem('token', newToken);
@@ -37,6 +45,9 @@ const useSocket = () => {
     const removeToken = () => {
         localStorage.removeItem('token');
         setToken(null);
+        if (socket) {
+            socket.disconnect();
+        }
     };
 
     return { socket, connected, token, updateToken, removeToken };
