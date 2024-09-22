@@ -1,158 +1,70 @@
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import { verifyToken } from '../utils/token';
-import { admin, db } from '../database/firebase';
+import roomManager from '../game/rooms';
 
-export const handleGameEvents = (socket: Socket, io: Server) => {
+export const handleGameEvents = (socket: Socket) => {
 
     socket.on('gameFlipCard', async ({ token, cardPosition }) => {
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
+        try {
+            const decodedToken = verifyToken(token);
+            if (!decodedToken) throw new Error('Token inválido');
+            if (cardPosition === undefined) throw new Error('Posição da carta não enviada');
+            if (isNaN(cardPosition)) throw new Error('Carta não existe');
+
+            const { uuid, roomId } = decodedToken;
+
+            const game = roomManager.getRoom(roomId);
+            if (!game) throw new Error('Sala não encontrada');
+            if (game.gameState.winner !== 0) throw new Error('Partida encerrada');
+            if (game.gameState.phase !== 2) throw new Error('Não é sua vez');
+
+
+            const player = game.getPlayer(uuid);
+            if (!player) throw new Error('Jogador não encontrado');
+            if (player.role !== 'operative') throw new Error('Você não é operative');
+            if (player.team !== game.gameState.turn) throw new Error('Não é seu turno');
+
+            const card = game.gameState.getCard(cardPosition);
+            if (!card) throw new Error('Carta não encontrada')
+            if (!card.hidden) throw new Error('Carta já está revelada');
+
+            game.gameState.flipCard(player.team, cardPosition)
+            game.emitGameState();
         }
-
-        if (!cardPosition) {
-            socket.emit('error', 'Posição da carta não enviada');
-            return;
+        catch (error) {
+            socket.emit('error', error.message);
         }
-
-        const { uuid, roomId } = decodedToken;
-
-        if (isNaN(cardPosition)) {
-            socket.emit('error', 'Carta não existe');
-            return;
-        }
-
-        const roomRef = db.collection('rooms').doc(roomId);
-        const roomDoc = await roomRef.get();
-
-        if (!roomDoc.exists) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
-
-        const roomData = roomDoc.data();
-
-        if (roomData.roomState.gameState.clue.number < 1) {
-            socket.emit('error', 'Não tem mais palpites');
-            return;
-        }
-
-        const player = roomData.roomState.players.find((p: any) => p.id === uuid)
-        if (!player) {
-            socket.emit('error', 'Jogador não encontrado');
-            return;
-        }
-
-        if (player.role !== 'operative') {
-            socket.emit('error', 'Você não é operative');
-            return;
-        }
-
-        if (Number(player.team) !== roomData.roomState.gameState.turn) {
-            socket.emit('error', 'Não é seu turno');
-            return;
-        }
-
-        const cardIndex = roomData.roomState.gameState.board.findIndex((c: any) => c.position === cardPosition);
-
-        if (cardIndex === -1) {
-            socket.emit('error', 'Carta não encontrada');
-            return;
-        }
-
-        if (roomData.roomState.gameState.board[cardIndex].hidden) {
-            socket.emit('error', 'Carta já está revelada');
-            return;
-        }
-
-        roomData.roomState.gameState.board[cardIndex].hidden = false
-        console.log(`Jogador ${player.username} virou a carta ${roomData.spymasterData.boardAnswers[cardIndex].word}`);
-
-        switch (roomData.spymasterData.boardAnswers[cardIndex].color) {
-            case 0: // gray card
-                break;
-            case 1: // blue card
-                if (player.team === 1) {
-                    roomData.roomState.gameState.teamsScore.team1--
-                    roomData.roomState.gameState.clue.number--
-                    console.log(`Ponto do time azul`);
-
-                    if (roomData.roomState.gameState.teamsScore.team1 <= 0) {
-                        roomData.roomState.status = "gameover"
-                        roomData.roomState.winner = 1
-                        console.log(`time azul venceu`);
-                        io.to(roomId).emit('spymasterCards', roomData.spymasterData)
-                    } else if (roomData.roomState.gameState.clue.number <= 0) {
-                        roomData.roomState.gameState.turn = 2
-                        roomData.roomState.gameState.clue.word = ''
-                        roomData.roomState.gameState.clue.number = 0
-                    }
-                } else {
-                    roomData.roomState.gameState.teamsScore.team2--
-                    roomData.roomState.gameState.turn = 2
-                    roomData.roomState.gameState.clue.word = ''
-                    roomData.roomState.gameState.clue.number = 0
-                    console.log(`Ponto do time vermelho`);
-
-                    if (roomData.roomState.gameState.teamsScore.team2 <= 0) {
-                        roomData.roomState.status = "gameover"
-                        roomData.roomState.winner = 2
-                        console.log(`time vermelho venceu`);
-                        io.to(roomId).emit('spymasterCards', roomData.spymasterData)
-                    }
-                }
-                break;
-            case 2: // red card
-                if (player.team === 2) {
-                    roomData.roomState.gameState.teamsScore.team1--
-                    roomData.roomState.gameState.clue.number--
-                    console.log(`Ponto do time vermelho`);
-
-                    if (roomData.roomState.gameState.teamsScore.team1 <= 0) {
-                        roomData.roomState.status = "gameover"
-                        roomData.roomState.winner = 2
-                        console.log(`time vermelho venceu`);
-                        io.to(roomId).emit('spymasterCards', roomData.spymasterData)
-                    } else if (roomData.roomState.gameState.clue.number <= 0) {
-                        roomData.roomState.gameState.turn = 1
-                        roomData.roomState.gameState.clue.word = ''
-                        roomData.roomState.gameState.clue.number = 0
-                    }
-                } else {
-                    roomData.roomState.gameState.teamsScore.team1--
-                    roomData.roomState.gameState.turn = 1
-                    roomData.roomState.gameState.clue.word = ''
-                    roomData.roomState.gameState.clue.number = 0
-                    console.log(`Ponto do time azul`);
-
-                    if (roomData.roomState.gameState.teamsScore.team1 <= 0) {
-                        roomData.roomState.status = "gameover"
-                        roomData.roomState.winner = 1
-                        console.log(`time azul venceu`);
-                        io.to(roomId).emit('spymasterCards', roomData.spymasterData)
-                    }
-                }
-                break;
-            case 3: // black card
-                roomData.roomState.status = "gameover"
-                roomData.roomState.winner = player.team === 1 ? 2 : 1
-                io.to(roomId).emit('spymasterCards', roomData.spymasterData)
-                console.log(`Carta preta, fim de jogo`);
-                break;
-        }
-
-        roomData.roomState.updatedAt = admin.firestore.FieldValue.serverTimestamp()
-        await roomRef.update({
-            'roomState': roomData.roomState
-        });
-
-        io.to(roomId).emit('roomState', roomData.roomState);
     });
 
 
     socket.on('gameClue', ({ token, word, number }) => {
+        try {
+            const decodedToken = verifyToken(token);
+            if (!decodedToken) throw new Error('Token inválido');
+            if (number === undefined || number < 1) throw new Error('Numero de dicas inválido');
+            if (!word) throw new Error('Dica não enviada');
 
+            const { uuid, roomId } = decodedToken;
+
+            const game = roomManager.getRoom(roomId);
+            if (!game) throw new Error('Sala não encontrada');
+            if (game.gameState.winner !== 0) throw new Error('Partida encerrada');
+            if (game.gameState.phase !== 1) throw new Error('Não é sua vez');
+
+
+            const player = game.getPlayer(uuid);
+            if (!player) throw new Error('Jogador não encontrado');
+            if (player.role !== 'spymaster') throw new Error('Você não é spymaster');
+            if (player.team !== game.gameState.turn) throw new Error('Não é seu turno');
+
+            game.gameState.clue.word = word
+            game.gameState.clue.number = number + 1
+            game.gameState.phase = 2
+            game.emitGameState();
+        }
+        catch (error) {
+            socket.emit('error', error.message);
+        }
     });
 
     socket.on('gameGuess', ({ token, cardIndex }) => {

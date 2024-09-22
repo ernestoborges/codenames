@@ -52,7 +52,8 @@ export default function Room() {
     },
   });
 
-  const [spymasterCards, setSpymasterCards] = useState([]);
+  const [clueWordInput, setClueWordInput] = useState<string>('');
+  const [clueNumberInput, setClueNumberInput] = useState<number>(0);
 
   const handleJoinRoom = () => {
     if (socket && username) {
@@ -71,15 +72,16 @@ export default function Room() {
         socket.emit('joinRoom', { roomId, token });
       }
 
-      socket.on('roomState', ({ players, name, gameState }) => {
+      socket.on('roomPlayers', (players) => {
         setPlayers(players);
-        setRoomName(name);
-        setGameState(gameState);
       })
 
-      socket.on('spymasterCards', (spymasterData) => {
-        setSpymasterCards(spymasterData.boardAnswers);
-      });
+      socket.on('gameState', (gameState) => {
+        if (!checkin) {
+          setCheckin(true)
+        }
+        setGameState(gameState);
+      })
 
       return () => {
         socket.off('roomState');
@@ -105,7 +107,8 @@ export default function Room() {
         Reiniciar jogo
       </Button>
       <div className='border-white border flex flex-col p-4'>
-        <span>Dicas: {gameState.clue.number}</span>
+        <span>Chance: {gameState.clue.number}</span>
+        <span>Dica: {gameState.clue.word}</span>
       </div>
       <div className='border-white border flex flex-col p-4'>
         <p>Time1: {gameState.teamsScore.team1}</p>
@@ -117,7 +120,18 @@ export default function Room() {
           <GameTeamSection players={players} team={2} />
         </div>
         <div>
-          <GameBoard cards={gameState.board} spymasterCards={spymasterCards} />
+          <GameBoard cards={gameState.board} />
+          <div>
+            <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
+            <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
+              {Array.from({ length: 10 + 1 }, (_, i) => (
+                <option key={i} value={i}>
+                  {i}
+                </option>
+              ))}
+            </select>
+            <Button onClick={()=>socket.emit('gameClue', {token, word: clueWordInput, number: clueNumberInput})}>Dar dica</Button>
+          </div>
         </div>
         <div>
           <Chat />

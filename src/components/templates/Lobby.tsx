@@ -7,20 +7,14 @@ import { useRouter } from "next/navigation";
 
 export default function Lobby() {
 
-    const { socket, connected } = useSocket();
+    const { socket, connected, token} = useSocket();
     const router = useRouter();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
-    const [token, setToken] = useState<string>('');
-
-    useEffect(() => {
-        setToken(localStorage.getItem('token') || '')
-    }, [])
 
     useEffect(() => {
         if (socket && connected) {
-            socket.on('roomCreated', ({ token, roomId }) => {
-                localStorage.setItem('token', token);
+            socket.on('roomCreated', (roomId) => {
                 router.push(`/game/codenames/${roomId}`);
             })
         }

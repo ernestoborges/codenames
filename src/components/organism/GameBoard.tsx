@@ -1,20 +1,18 @@
 import GameCard from "../molecules/GameCard"
 
 export default function GameBoard({
-    cards,
-    spymasterCards
+    cards
 }: {
-    cards: any[],
-    spymasterCards: any[]
+    cards: any[]
 }) {
 
     const cardsColor = {};
-    spymasterCards.forEach((sc) => {
-        switch (sc.color) {
-            case 0: cardsColor[sc.position] = 'gray'; break;
-            case 1: cardsColor[sc.position] = 'blue'; break;
-            case 2: cardsColor[sc.position] = 'red'; break;
-            case 3: cardsColor[sc.position] = 'black'; break;
+    cards.forEach((c) => {
+        switch (c.color) {
+            case 0: cardsColor[c.position] = 'gray'; break;
+            case 1: cardsColor[c.position] = 'blue'; break;
+            case 2: cardsColor[c.position] = 'red'; break;
+            case 3: cardsColor[c.position] = 'black'; break;
         }
     })
 

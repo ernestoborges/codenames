@@ -51,7 +51,7 @@ app.prepare().then(() => {
     handleConnection(socket);
     handleRoomEvents(socket, io);
     handleChatEvents(socket, io);
-    handleGameEvents(socket, io);
+    handleGameEvents(socket);
   });
 
   const PORT = process.env.PORT || port;

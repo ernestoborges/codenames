@@ -13,12 +13,12 @@ export default function GameTeamSection({ players, team }: { players: any, team:
             <div className="flex justify-between items-center">
                 <p>Operative</p>
                 <Button onClick={() => {
-                    socket.emit('updateTeam', { token, team: `${team}`, role: 'operative' })
+                    socket.emit('updateTeam', { token, team, role: 'operative' })
                 }}>Entrar</Button>
             </div>
             <ul>
                 {
-                    players.filter(player => player.team === `${team}` && player.role === 'operative').map(player =>
+                    players.filter(player => player.team === team && player.role === 'operative').map(player =>
                         <li key={player.id}>
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
                         </li>
@@ -28,12 +28,12 @@ export default function GameTeamSection({ players, team }: { players: any, team:
             <div className="flex justify-between items-center">
                 <p>Spymaster</p>
                 <Button onClick={() => {
-                    socket.emit('updateTeam', { token, team: `${team}`, role: 'spymaster' })
+                    socket.emit('updateTeam', { token, team, role: 'spymaster' })
                 }}>Entrar</Button>
             </div>
             <ul>
                 {
-                    players.filter(player => player.team === `${team}` && player.role === 'spymaster').map(player =>
+                    players.filter(player => player.team === team && player.role === 'spymaster').map(player =>
                         <li key={player.id}>
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
                         </li>
