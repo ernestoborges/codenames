@@ -2,6 +2,7 @@ import { Socket } from "socket.io"
 import Button from "../atoms/Button"
 import PlayerLabel from "../molecules/PlayerLabel"
 import useSocket from "../../hooks/useSocket"
+import PlaceholderLabel from "../molecules/PlaceholderLabel"
 
 export default function GameTeamSection({
     players,
@@ -16,9 +17,11 @@ export default function GameTeamSection({
     const { socket, token } = useSocket();
 
     return <>
-        <div className='border-white border-2 flex flex-col w-full gap-2'>
-            <p>Time {team}</p>
-            <p>{score}</p>
+        <div className='border-white border-2 flex flex-col w-full text-2xl'>
+            <div className="bg-blue p-2 border-b-2 flex justify-between">
+                <p>Time {team}</p>
+                <p>{score}</p>
+            </div>
             <div className="flex justify-between items-center bg-white text-black w-full">
                 <p>Operative</p>
                 <Button onClick={() => {
@@ -32,6 +35,13 @@ export default function GameTeamSection({
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
                         </li>
                     )
+                }
+                {
+                    Array.from({ length: Math.max(0, 5 - players.filter(player => player.team === team && player.role === 'operative').length)}, (_, i) => (
+                        <li key={i}>
+                            <PlayerLabel />
+                        </li>
+                    ))
                 }
             </ul>
             <div className="flex justify-between items-center bg-white text-black w-full">
@@ -47,6 +57,13 @@ export default function GameTeamSection({
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
                         </li>
                     )
+                }
+                {
+                    Array.from({ length: Math.max(0, 2 - players.filter(player => player.team === team && player.role === 'spymaster').length)}, (_, i) => (
+                        <li key={i}>
+                            <PlayerLabel />
+                        </li>
+                    ))
                 }
             </ul>
 

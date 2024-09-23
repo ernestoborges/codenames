@@ -107,20 +107,26 @@ export default function Room() {
   }
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Sala: {roomName}</h1>
-      <Button onClick={() => socket.emit('restartGame', { token })}>
+    <div
+      className="p-4 h-screen"
+      style={{
+        // backgroundColor: '#e5e5f7',
+        backgroundImage: 'linear-gradient(0deg, #1a1a1a1a 50%, #3a3a3a3a 50%)',
+        backgroundSize: '10px 10px'
+      }}>
+      {/* <h1 className="text-2xl font-bold mb-4">Sala: {roomName}</h1> */}
+      {/* <Button onClick={() => socket.emit('restartGame', { token })}>
         Reiniciar jogo
-      </Button>
-      <div className='border-white border flex flex-col p-4'>
+      </Button> */}
+      {/* <div className='border-white border flex flex-col p-4'>
         <span>Dica: {gameState.clue.word}</span>
         <span>Referencias: {gameState.clue.number}</span>
         <span>Chances: {gameState.clue.remaining}</span>
-      </div>
+      </div> */}
       <div className='flex gap-2 items-start justify-between'>
         <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
           <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} />
-          <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2}/>
+          <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} />
         </div>
         <div>
           <GameBoard cards={gameState.board} />
@@ -151,6 +157,6 @@ export default function Room() {
         </div>
       </div>
 
-    </div>
+    </div >
   );
 }
