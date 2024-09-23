@@ -20,13 +20,16 @@ interface GameState {
   turn: number,
   clue: {
     word: string,
-    number: number
+    number: number,
+    remaining: number
   },
   board: string[],
   teamsScore: {
     team1: number,
     team2: number
   },
+  spymasterTurn: boolean,
+  operativeTurn: boolean
 }
 
 
@@ -43,13 +46,16 @@ export default function Room() {
     turn: 1,
     clue: {
       word: '',
-      number: 0
+      number: 0,
+      remaining: 0
     },
     board: [],
     teamsScore: {
       team1: 0,
       team2: 0
     },
+    spymasterTurn: false,
+    operativeTurn: false
   });
 
   const [clueWordInput, setClueWordInput] = useState<string>('');
@@ -107,31 +113,38 @@ export default function Room() {
         Reiniciar jogo
       </Button>
       <div className='border-white border flex flex-col p-4'>
-        <span>Chance: {gameState.clue.number}</span>
         <span>Dica: {gameState.clue.word}</span>
+        <span>Referencias: {gameState.clue.number}</span>
+        <span>Chances: {gameState.clue.remaining}</span>
       </div>
-      <div className='border-white border flex flex-col p-4'>
-        <p>Time1: {gameState.teamsScore.team1}</p>
-        <p>Time2: {gameState.teamsScore.team2}</p>
-      </div>
-      <div className='flex gap-4 items-start'>
-        <div className='flex flex-col items-center min-w-[15rem] max-w-[20rem] gap-4'>
-          <GameTeamSection players={players} team={1} />
-          <GameTeamSection players={players} team={2} />
+      <div className='flex gap-2 items-start justify-between'>
+        <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
+          <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} />
+          <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2}/>
         </div>
         <div>
           <GameBoard cards={gameState.board} />
-          <div>
-            <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
-            <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
-              {Array.from({ length: 10 + 1 }, (_, i) => (
-                <option key={i} value={i}>
-                  {i}
+          {
+            gameState.spymasterTurn &&
+            <div>
+              <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
+              <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
+                {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
+                  <option key={i} value={i}>
+                    {i}
+                  </option>
+                ))}
+                <option value={-1}>
+                  infinito
                 </option>
-              ))}
-            </select>
-            <Button onClick={()=>socket.emit('gameClue', {token, word: clueWordInput, number: clueNumberInput})}>Dar dica</Button>
-          </div>
+              </select>
+              <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
+            </div>
+          }
+          {
+            gameState.operativeTurn &&
+            <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+          }
         </div>
         <div>
           <Chat />

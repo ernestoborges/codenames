@@ -35,6 +35,7 @@ export class GameRoom {
         }
 
         this.emitPlayers();
+        this.emitGameState(player.socket)
         console.log(`${player.username} atualizado: role[${player.role}] e team[${player.team}]`);
     }
 
@@ -78,14 +79,16 @@ export class GameRoom {
             const gameStateToSend = {
                 ...this.gameState,
                 board: p.role === 'spymaster' ? this.gameState.board : this.gameState.getOperativeCards(),
+                spymasterTurn: p.role === 'spymaster' && this.gameState.turn === p.team && this.gameState.phase === 1,
+                operativeTurn: p.role === 'operative' && this.gameState.turn === p.team && this.gameState.phase === 2
             };
 
-            if (!playerSocket)
+            if (!playerSocket || playerSocket === p.socket)
                 this.io.to(p.socket).emit('gameState', gameStateToSend)
 
 
-            if (playerSocket === p.socket)
-                this.io.to(p.socket).emit('gameState', gameStateToSend)
+            // if (playerSocket === p.socket)
+            //     this.io.to(p.socket).emit('gameState', gameStateToSend)
 
         })
     }

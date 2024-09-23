@@ -3,14 +3,23 @@ import Button from "../atoms/Button"
 import PlayerLabel from "../molecules/PlayerLabel"
 import useSocket from "../../hooks/useSocket"
 
-export default function GameTeamSection({ players, team }: { players: any, team: number }) {
+export default function GameTeamSection({
+    players,
+    team,
+    score
+}: {
+    players: any,
+    team: number,
+    score: number
+}) {
 
     const { socket, token } = useSocket();
 
     return <>
-        <div className='border-white border flex flex-col p-4 w-full gap-4'>
+        <div className='border-white border-2 flex flex-col w-full gap-2'>
             <p>Time {team}</p>
-            <div className="flex justify-between items-center">
+            <p>{score}</p>
+            <div className="flex justify-between items-center bg-white text-black w-full">
                 <p>Operative</p>
                 <Button onClick={() => {
                     socket.emit('updateTeam', { token, team, role: 'operative' })
@@ -25,7 +34,7 @@ export default function GameTeamSection({ players, team }: { players: any, team:
                     )
                 }
             </ul>
-            <div className="flex justify-between items-center">
+            <div className="flex justify-between items-center bg-white text-black w-full">
                 <p>Spymaster</p>
                 <Button onClick={() => {
                     socket.emit('updateTeam', { token, team, role: 'spymaster' })

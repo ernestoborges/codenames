@@ -58,6 +58,11 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             }
         }
 
+        if(!playerName){
+            socket.emit('error', 'Nome de usuário não enviado');
+            return;
+        }
+
         const nameExists = game.players.some(player => player.username === playerName);
         if (nameExists) {
             socket.emit('error', 'Nome de usuário já existe na sala');

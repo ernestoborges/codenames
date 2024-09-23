@@ -5,14 +5,22 @@ import { generateToken, verifyToken } from '../utils/token';
 import { Player } from './Player';
 
 
+
 export class Game {
     turn: number
     phase: number
     clue: {
         word: string
         number: number
+        remaining: number
     }
-    board: any[]
+    board: {
+        word: string
+        color: number
+        position: number
+        tips: string[]
+        hidden: boolean
+    }[]
     teamsScore: {
         team1: number
         team2: number
@@ -21,7 +29,7 @@ export class Game {
 
     constructor() {
         this.turn = 1
-        this.clue = { word: '', number: 0 }
+        this.clue = { word: '', number: 0, remaining: 0 }
         this.teamsScore = {
             team1: 0,
             team2: 0
@@ -37,33 +45,25 @@ export class Game {
 
         switch (card.color) {
             case 0: // gray card
-                {
-                    this.turn = opponentTeam;
-                    this.phase = 1;
-                    this.clue = { word: '', number: 0 };
-                }
+                this.endTurn();
                 break;
             case 1: // blue card
             case 2: // red card
                 {
-                    this.clue.number--
+                    this.clue.remaining--
                     if (team === card.color) { // own team card
                         this.teamsScore[team === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[team === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(team)
-                        } else if (this.clue.number <= 0) {
-                            this.turn = opponentTeam;
-                            this.phase = 1;
-                            this.clue = { word: '', number: 0 };
+                        } else if (this.clue.number >= 0 && this.clue.remaining <= 0) {
+                            this.endTurn();
                         }
                     } else {  // opponent's card
                         this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(opponentTeam)
                         } else {
-                            this.turn = opponentTeam;
-                            this.phase = 1;
-                            this.clue = { word: '', number: 0 };
+                            this.endTurn();
                         }
                     }
                 }
@@ -91,6 +91,12 @@ export class Game {
         this.winner = winner;
     }
 
+    endTurn() {
+        this.turn = this.turn === 1 ? 2 : 1;
+        this.phase = 1;
+        this.clue = { word: '', number: 0, remaining: 0 };
+    }
+
     startGame() {
         const words = RandomWords(25);
         const timeInicial = Math.random() < 0.5 ? 1 : 2;
@@ -111,7 +117,7 @@ export class Game {
 
         this.turn = timeInicial
         this.phase = 1
-        this.clue = { word: '', number: 5 }
+        this.clue = { word: '', number: 0, remaining: 0 }
         this.teamsScore = {
             team1: timeInicial === 1 ? 9 : 8,
             team2: timeInicial === 1 ? 8 : 9
