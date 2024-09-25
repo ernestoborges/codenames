@@ -115,9 +115,6 @@ export default function Room() {
         backgroundSize: '10px 10px'
       }}>
       {/* <h1 className="text-2xl font-bold mb-4">Sala: {roomName}</h1> */}
-      {/* <Button onClick={() => socket.emit('restartGame', { token })}>
-        Reiniciar jogo
-      </Button> */}
       {/* <div className='border-white border flex flex-col p-4'>
         <span>Dica: {gameState.clue.word}</span>
         <span>Referencias: {gameState.clue.number}</span>
@@ -153,6 +150,9 @@ export default function Room() {
           }
         </div>
         <div>
+          <Button onClick={() => socket.emit('restartGame', { token })}>
+            Reiniciar jogo
+          </Button>
           <Chat />
         </div>
       </div>

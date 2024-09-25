@@ -17,8 +17,8 @@ export default function GameTeamSection({
     const { socket, token } = useSocket();
 
     return <>
-        <div className='border-white border-2 flex flex-col w-full text-2xl'>
-            <div className="bg-blue p-2 border-b-2 flex justify-between">
+        <div className={`bg-${team === 1 ? 'blue' : 'red' } border-white border-2 flex flex-col w-full text-2xl`}>
+            <div className={`p-2 border-b-2 flex justify-between`}>
                 <p>Time {team}</p>
                 <p>{score}</p>
             </div>
@@ -32,14 +32,14 @@ export default function GameTeamSection({
                 {
                     players.filter(player => player.team === team && player.role === 'operative').map(player =>
                         <li key={player.id}>
-                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
+                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }
                 {
                     Array.from({ length: Math.max(0, 5 - players.filter(player => player.team === team && player.role === 'operative').length)}, (_, i) => (
                         <li key={i}>
-                            <PlayerLabel />
+                            <PlayerLabel isPlaceholder={true} />
                         </li>
                     ))
                 }
@@ -54,14 +54,14 @@ export default function GameTeamSection({
                 {
                     players.filter(player => player.team === team && player.role === 'spymaster').map(player =>
                         <li key={player.id}>
-                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} />
+                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }
                 {
                     Array.from({ length: Math.max(0, 2 - players.filter(player => player.team === team && player.role === 'spymaster').length)}, (_, i) => (
                         <li key={i}>
-                            <PlayerLabel />
+                            <PlayerLabel isPlaceholder={true} />
                         </li>
                     ))
                 }

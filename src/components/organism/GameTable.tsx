@@ -1,4 +1,4 @@
-import { RandomWords } from "../../utils/words";
+import { RandomWords } from "../../utils/functions";
 import GameBoard from "../molecules/GameBoard";
 import { GameTipBar } from "../molecules/GameTipBar";
 import GameTeamSection from "./GameTeamSection";

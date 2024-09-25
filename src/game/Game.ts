@@ -1,6 +1,6 @@
 import { Socket, Server } from 'socket.io';
 import { v4 as uuidv4 } from 'uuid';
-import { RandomWords, shuffleList } from '../utils/words';
+import { RandomWords, shuffleList } from '../utils/functions';
 import { generateToken, verifyToken } from '../utils/token';
 import { Player } from './Player';
 

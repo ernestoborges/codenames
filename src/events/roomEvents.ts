@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GameRoom } from '../game/GameRoom';
 import { Player } from '../game/Player';
 import roomManager from '../game/rooms';
+import { randomNumberExclude } from '../utils/functions';
 
 export const handleRoomEvents = (socket: Socket, io: Server) => {
     socket.on('createRoom', ({ playerName, roomName }: { playerName: string, roomName: string }) => {
@@ -14,7 +15,9 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         const roomId = uuidv4();
         const newRoom = new GameRoom(io, roomId, roomName);
-        const player = new Player(uuidv4(), playerName, socket.id, true);
+
+        const avatar = randomNumberExclude([], 1, 47);
+        const player = new Player(uuidv4(), playerName, socket.id, avatar, true);
 
         newRoom.addPlayer(player);
         roomManager.addRoom(newRoom);
@@ -58,7 +61,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             }
         }
 
-        if(!playerName){
+        if (!playerName) {
             socket.emit('error', 'Nome de usuário não enviado');
             return;
         }
@@ -69,7 +72,9 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             return;
         }
 
-        const player = new Player(uuidv4(), playerName, socket.id);
+        const playerAvatars = game.players.map(p => p.avatar)
+        const avatar = randomNumberExclude(playerAvatars, 1, 47);
+        const player = new Player(uuidv4(), playerName, socket.id, avatar);
         socket.join(roomId);
         const newToken = generateToken({ roomId, username: playerName, uuid: player.id });
         socket.emit('token', newToken)

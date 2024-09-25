@@ -9,6 +9,12 @@ export class GameRoom {
     public players: Player[] = [];
     public gameState: Game;
     public status: string;
+    public chat: {
+        senderId: string,
+        sender: string,
+        message: string,
+        timestamp: Date
+    }[] = [];
 
     constructor(io: Server, public id: string, public name: string) {
         this.io = io;
@@ -21,6 +27,44 @@ export class GameRoom {
         this.emitGameState(player.socket);
         this.emitPlayers();
         console.log(`${player.username} entrou na sala ${this.name}`);
+    }
+
+    addChatMessage(player: Player, message: string) {
+        const timestamp = new Date();
+        this.chat.push({ senderId: player.id, sender: player.username, message, timestamp });
+        this.emitChat()
+    }
+
+    emitChat(socket?: string) {
+
+        if (socket) {
+            const player = this.players.find(p => p.socket === socket)
+
+            if (!player) {
+                this.io.to(socket).emit('error', 'Erro ao atualizar chat');
+                return
+            }
+
+            const chatToSend = this.chat.map(m => ({
+                sender: m.sender,
+                message: m.message,
+                timestamp: m.timestamp,
+                me: m.senderId === player.id
+            }))
+
+            this.io.to(player.socket).emit('chatUpdate', chatToSend);
+        } else {
+            this.players.forEach(p => {
+                const chatToSend = this.chat.map(m => ({
+                    sender: m.sender,
+                    message: m.message,
+                    timestamp: m.timestamp,
+                    me: m.senderId === p.id
+                }))
+
+                this.io.to(p.socket).emit('chatUpdate', chatToSend);
+            })
+        }
     }
 
     getPlayer(id: string) {
@@ -68,7 +112,8 @@ export class GameRoom {
             username: p.username,
             role: p.role,
             team: p.team,
-            admin: p.admin
+            admin: p.admin,
+            avatar: p.avatar
         }))
 
         this.io.to(this.id).emit('roomPlayers', response)
