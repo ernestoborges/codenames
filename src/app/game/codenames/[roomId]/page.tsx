@@ -32,16 +32,24 @@ interface GameState {
   operativeTurn: boolean
 }
 
+interface RoomState {
+  name: string,
+  status: string
+}
+
 
 export default function Room() {
 
   const { roomId } = useParams();
   const { socket, connected, token, updateToken } = useSocket();
 
-  const [roomName, setRoomName] = useState<string>("");
   const [players, setPlayers] = useState<Player[]>([]);
   const [username, setUsername] = useState<string>("");
   const [checkin, setCheckin] = useState<boolean>(false);
+  const [roomState, setRoomState] = useState<RoomState>({
+    name: '',
+    status: 'waiting'
+  });
   const [gameState, setGameState] = useState<GameState>({
     turn: 1,
     clue: {
@@ -70,9 +78,9 @@ export default function Room() {
   useEffect(() => {
     if (connected && socket) {
 
-      socket.on('allowCheckin', (isAllowed: boolean) => {
-        setCheckin(isAllowed);
-      })
+      // socket.on('allowCheckin', (isAllowed: boolean) => {
+      //   setCheckin(isAllowed);
+      // })
 
       if (token) {
         socket.emit('joinRoom', { roomId, token });
@@ -83,10 +91,17 @@ export default function Room() {
       })
 
       socket.on('gameState', (gameState) => {
+        // if (!checkin) {
+        //   setCheckin(true)
+        // }
+        setGameState(gameState);
+      })
+
+      socket.on('roomState', (roomState) => {
         if (!checkin) {
           setCheckin(true)
         }
-        setGameState(gameState);
+        setRoomState(roomState)
       })
 
       return () => {
@@ -122,32 +137,53 @@ export default function Room() {
       </div> */}
       <div className='flex gap-2 items-start justify-between'>
         <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
-          <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} />
-          <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} />
+          <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} roomState={roomState} />
+          <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} roomState={roomState} />
         </div>
         <div>
-          <GameBoard cards={gameState.board} />
           {
-            gameState.spymasterTurn &&
-            <div>
-              <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
-              <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
-                {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
-                  <option key={i} value={i}>
-                    {i}
-                  </option>
-                ))}
-                <option value={-1}>
-                  infinito
-                </option>
-              </select>
-              <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
-            </div>
+            roomState.status === 'waiting'
+              ?
+              <>
+                <div>
+                  Esperando jogadores
+                  <div>
+                    <Button onClick={() => socket.emit('gameResetTeams', { token })}>
+                      Reiniciar Time
+                    </Button>
+                    <Button onClick={() => socket.emit('startGame', { token, roomId })}>
+                      Iniciar Jogo
+                    </Button>
+                  </div>
+                </div>
+              </>
+              :
+              <>
+                <GameBoard cards={gameState.board} />
+                {
+                  gameState.spymasterTurn &&
+                  <div>
+                    <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
+                    <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
+                      {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
+                        <option key={i} value={i}>
+                          {i}
+                        </option>
+                      ))}
+                      <option value={-1}>
+                        infinito
+                      </option>
+                    </select>
+                    <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
+                  </div>
+                }
+                {
+                  gameState.operativeTurn &&
+                  <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+                }
+              </>
           }
-          {
-            gameState.operativeTurn &&
-            <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
-          }
+
         </div>
         <div>
           <Button onClick={() => socket.emit('restartGame', { token })}>

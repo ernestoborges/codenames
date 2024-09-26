@@ -31,7 +31,9 @@ export default function PlayerLabel({
 
     return <>
         <LabelContainer>
-            <Image className="" src={`/avatars/${avatar ? avatar : 1}.png`} width={26} height={26} alt='' />
+            <div className="relative w-[26px] h-[26px]">
+                <Image fill src={`/avatars/${avatar ? avatar : 1}.png`} alt='' />
+            </div>
             <div className="rounded-full w-3 h-3" style={{ backgroundColor: isOnline ? "green" : "gray" }} />
             <span>{name}</span>
             {isAdmin && <FaCrown />}

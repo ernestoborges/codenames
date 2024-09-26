@@ -87,16 +87,16 @@ export const handleGameEvents = (socket: Socket) => {
             if (player.team !== game.gameState.turn) throw new Error('Não é seu turno');
 
             const card = game.gameState.board.find(c => c.position === cardIndex)
-            if(!card) throw new Error('Carta não encontrada');
+            if (!card) throw new Error('Carta não encontrada');
 
             const alreadyTipped = card.tips.find(name => name === player.username)
-            if(alreadyTipped) {
+            if (alreadyTipped) {
                 card.tips = card.tips.filter(n => n !== player.username)
             } else {
                 card.tips.push(player.username)
             }
 
-            game.emitGameState();           
+            game.emitGameState();
         }
         catch (error) {
             socket.emit('error', error.message);

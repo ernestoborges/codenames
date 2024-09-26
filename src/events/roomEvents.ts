@@ -24,6 +24,8 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
         const token = generateToken({ roomId, username: playerName, uuid: player.id });
         socket.emit('token', token);
+
+        newRoom.emitRoomState(player.socket);
         socket.emit('roomCreated', roomId);
         console.log(`${playerName} criou a sala ${roomName}`);
     });
@@ -53,9 +55,9 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
                 console.log(`Cliente reconectado: ${uuid}`);
                 socket.join(roomId);
                 game.connectPlayer(player.id);
-                socket.emit('allowCheckin', true);
                 socket.emit('token', token)
-
+                game.emitRoomState(player.socket);
+                game.emitGameState(player.socket);
                 console.log(`${player.username} entrou na sala ${roomId}`);
                 return;
             }
@@ -79,15 +81,29 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         const newToken = generateToken({ roomId, username: playerName, uuid: player.id });
         socket.emit('token', newToken)
         game.addPlayer(player);
+        game.emitRoomState(player.socket);
+        game.emitGameState(player.socket);
     });
 
-    socket.on('startGame', ({ roomId }: { roomId: string }) => {
-        const game = roomManager.getRoom(roomId);
-        if (game) {
+    socket.on('startGame', ({ token, roomId }: { token: string, roomId: string }) => {
+        try {
+            const decodedToken = verifyToken(token);
+            if (!decodedToken) throw new Error('Token inválido');
+
+            const { uuid, roomId } = decodedToken;
+
+            const game = roomManager.getRoom(roomId);
+
+            if (!game) throw new Error('Sala não encontrada');
+
+            const player = game.getPlayer(uuid);
+            if (!player) throw new Error('Jogador não encontrado na sala');
+            if (!player.admin) throw new Error('Jogador não é admin');
+
             game.startGame();
-            console.log(`Jogo iniciado na sala ${roomId}`);
-        } else {
-            socket.emit('error', 'Sala não encontrada');
+        }
+        catch (error) {
+            socket.emit('error', error.message);
         }
     });
 
@@ -156,5 +172,27 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         }
 
         game.updatePlayerTeamAndRole(player.id, team, role);
+    });
+
+    socket.on('gameResetTeams', ({ token }) => {
+        try {
+            const decodedToken = verifyToken(token);
+            if (!decodedToken) throw new Error('Token inválido');
+
+            const { uuid, roomId } = decodedToken;
+
+            const game = roomManager.getRoom(roomId);
+
+            if (!game) throw new Error('Sala não encontrada');
+
+            const player = game.getPlayer(uuid);
+            if (!player) throw new Error('Jogador não encontrado na sala');
+            if (!player.admin) throw new Error('Jogador não é admin');
+
+            game.resetTeams();
+        }
+        catch (error) {
+            socket.emit('error', error.message);
+        }
     });
 };
