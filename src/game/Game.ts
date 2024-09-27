@@ -3,10 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { RandomWords, shuffleList } from '../utils/functions';
 import { generateToken, verifyToken } from '../utils/token';
 import { Player } from './Player';
+import { GameRoom } from './GameRoom';
 
 
 
 export class Game {
+    private log
     turn: number
     phase: number
     clue: {
@@ -27,7 +29,8 @@ export class Game {
     }
     winner: number
 
-    constructor() {
+    // constructor(room: GameRoom) {
+    constructor(log) {
         this.turn = 1
         this.clue = { word: '', number: 0, remaining: 0 }
         this.teamsScore = {
@@ -35,14 +38,16 @@ export class Game {
             team2: 0
         }
         this.board = []
+        this.log = log
     }
 
-    flipCard(team: number, position: number) {
+    flipCard(player: Player, position: number) {
 
+        const team = player.team;
         const card = this.board[position];
         card.hidden = false;
         const opponentTeam = team === 1 ? 2 : 1
-
+        this.log('action', `${player.username} virou a carta ${card.color === 0 ? 'cinza' : card.color === 1 ? 'azul' : card.color === 2 ? 'vermelha' : 'preta'}: ${card.word}`, { action: { player, flip: { word: card.word, color: card.color } } })
         switch (card.color) {
             case 0: // gray card
                 this.endTurn();
@@ -95,6 +100,7 @@ export class Game {
         this.turn = this.turn === 1 ? 2 : 1;
         this.phase = 1;
         this.clue = { word: '', number: 0, remaining: 0 };
+        this.log('system', `Turno do time ${this.turn}`, { system: { type: 'endTurn' } })
     }
 
     startGame() {
@@ -124,9 +130,12 @@ export class Game {
         }
         this.board = cards
         this.winner = 0
+
+        this.log('system', `Jogo iniciado`, { system: { type: 'gameStart' } })
     }
 
     restartGame() {
+        this.log('system', `Jogo reiniciado`, { system: { type: 'gameRestart' } })
         this.startGame()
     }
 }

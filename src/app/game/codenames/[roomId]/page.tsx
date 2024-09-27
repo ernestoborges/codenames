@@ -7,6 +7,7 @@ import PlayerLabel from '../../../../components/molecules/PlayerLabel';
 import GameTeamSection from '../../../../components/organism/GameTeamSection';
 import Chat from '../../../../components/organism/Chat';
 import GameBoard from '../../../../components/organism/GameBoard';
+import LogChat from '../../../../components/organism/LogChat';
 
 interface Player {
   id: string;
@@ -120,7 +121,6 @@ export default function Room() {
       </div>
     )
   }
-
   return (
     <div
       className="p-4 h-screen"
@@ -135,19 +135,21 @@ export default function Room() {
         <span>Referencias: {gameState.clue.number}</span>
         <span>Chances: {gameState.clue.remaining}</span>
       </div> */}
-      <div className='flex gap-2 items-start justify-between'>
+      <div className='flex gap-2 items-center justify-between'>
         <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
           <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} roomState={roomState} />
           <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} roomState={roomState} />
         </div>
-        <div>
+        <div className='h-full flex items-center'>
           {
             roomState.status === 'waiting'
               ?
               <>
-                <div>
-                  Esperando jogadores
-                  <div>
+                <div className='bg-gray-100 rounded-sm flex flex-col p-4 gap-4'>
+                  <div className='p-8'>
+                    Esperando jogadores
+                  </div>
+                  <div className='flex gap-4'>
                     <Button onClick={() => socket.emit('gameResetTeams', { token })}>
                       Reiniciar Time
                     </Button>
@@ -189,6 +191,7 @@ export default function Room() {
           <Button onClick={() => socket.emit('restartGame', { token })}>
             Reiniciar jogo
           </Button>
+          <LogChat />
           <Chat />
         </div>
       </div>

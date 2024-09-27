@@ -8,6 +8,26 @@ export class GameRoom {
     public players: Player[] = [];
     public gameState: Game;
     public status: 'waiting' | 'playing';
+    public roomLog: {
+        type: 'action' | 'player' | 'error' | 'system';
+        details: {
+            player?: {
+                data: Player,
+                event: 'connected' | 'disconnected' | 'changeTeamRole' | 'enteredRoom'
+            },
+            action?: {
+                player: Player,
+                clue?: { word: string, number: number },
+                flip?: { word: string, color: number },
+                endTurn?: boolean
+            },
+            system?: {
+                type: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset' | 'endTurn'
+            }
+        }
+        message: string;
+        timestamp: Date
+    }[] = [];
     public chat: {
         senderId: string,
         sender: string,
@@ -18,11 +38,26 @@ export class GameRoom {
     constructor(io: Server, public id: string, public name: string) {
         this.io = io;
         this.status = 'waiting';
-        this.gameState = new Game();
+        this.gameState = new Game(this.log.bind(this));
+    }
+
+    log(type: 'action' | 'player' | 'error' | 'system', message: string, details) {
+        this.roomLog.push({
+            type,
+            details,
+            message,
+            timestamp: new Date()
+        })
+        this.emitLog()
+    }
+
+    emitLog(){
+        this.io.to(this.id).emit('roomLog', this.roomLog)
     }
 
     addPlayer(player: Player) {
         this.players.push(player);
+        this.log('player', `${player.username} entrou na sala.`, { player, event: 'enteredRoom' })
         this.emitGameState(player.socket);
         this.emitRoomState(player.socket);
         this.emitPlayers();
@@ -79,6 +114,7 @@ export class GameRoom {
         player.role = role;
         player.team = team;
 
+        this.log('player', `${player.username} mudou para ${player.role} do time ${player.team}.`, { player, event: 'changeTeamRole' })
         this.emitPlayers();
         this.emitGameState(player.socket)
         console.log(`${player.username} atualizado: role[${player.role}] e team[${player.team}]`);
@@ -95,6 +131,7 @@ export class GameRoom {
         if (player) {
             player.connected = true;
             this.emitPlayers();
+            this.log('player', `${player.username} está online.`, { player, event: 'connected' })
             console.log(`${player.username} está online`);
         }
     }
@@ -104,6 +141,7 @@ export class GameRoom {
         if (player) {
             player.connected = false;
             this.emitPlayers();
+            this.log('player', `${player.username} desconectado.`, { player, event: 'disconnected' })
             console.log(`${player.username} está offline`);
         }
     }
@@ -198,11 +236,13 @@ export class GameRoom {
             p.role = 'spectator'
             p.team = 0
         })
+        this.log('system', 'Os times foram redefinidos', {type: 'teamsReset'})
         this.emitPlayers();
     }
 
     restartGame() {
         this.status = 'waiting';
+        this.log('system', 'Partida reiniciada', {type: 'gameReset'})
         this.emitRoomState();
     }
 }

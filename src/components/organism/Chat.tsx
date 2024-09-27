@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { IoMdSend } from "react-icons/io";
 import useSocket from "../../hooks/useSocket"
+import MessageDisplay from "../molecules/MessageDisplay";
 
 interface Message {
     sender: string,
@@ -11,9 +12,7 @@ interface Message {
 
 export default function Chat() {
 
-    const messagesEndRef = useRef(null);
-    const messagesContainerRef = useRef(null);
-    const [isUserAtBottom, setIsUserAtBottom] = useState(true);
+
 
     const { socket, token, connected } = useSocket();
     const [chat, setChat] = useState<Message[]>([]);
@@ -28,22 +27,6 @@ export default function Chat() {
         }
     }
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const handleScroll = () => {
-        const container = messagesContainerRef.current;
-        const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
-        setIsUserAtBottom(isAtBottom);
-    };
-
-    useEffect(() => {
-        if (isUserAtBottom) {
-            scrollToBottom();
-        }
-    }, [chat, isUserAtBottom]);
-
     useEffect(() => {
         if (socket && connected && token) {
             socket.on('chatUpdate', (newChat: Message[]) => {
@@ -54,11 +37,8 @@ export default function Chat() {
 
     return (
         <div className="border rounded-lg p-4 flex flex-col gap-4 items-center w-[30rem] h-[40rem]">
-            <ul
-                className="flex flex-col w-full h-full overflow-y-scroll text-2xl"
-                ref={messagesContainerRef}
-                onScroll={handleScroll}
-            >
+            <MessageDisplay>
+
                 {
                     chat.map((c, i) =>
                         <li key={i}>
@@ -69,8 +49,7 @@ export default function Chat() {
                         </li>
                     )
                 }
-                <div ref={messagesEndRef} />
-            </ul>
+            </MessageDisplay>
             <form
                 className="w-full bg-white flex"
                 onSubmit={handleSendMessage}
