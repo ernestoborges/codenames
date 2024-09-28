@@ -161,33 +161,35 @@ export default function Room() {
               </>
               :
               <>
-                <GameBoard cards={gameState.board} />
-                {
-                  gameState.spymasterTurn &&
-                  <div>
-                    <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
-                    <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
-                      {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
-                        <option key={i} value={i}>
-                          {i}
+                <div className='flex flex-col items-center'>
+                  <GameBoard cards={gameState.board} />
+                  {
+                    gameState.spymasterTurn &&
+                    <div>
+                      <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
+                      <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
+                        {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
+                          <option key={i} value={i}>
+                            {i}
+                          </option>
+                        ))}
+                        <option value={-1}>
+                          infinito
                         </option>
-                      ))}
-                      <option value={-1}>
-                        infinito
-                      </option>
-                    </select>
-                    <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
-                  </div>
-                }
-                {
-                  gameState.operativeTurn &&
-                  <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
-                }
+                      </select>
+                      <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
+                    </div>
+                  }
+                  {
+                    gameState.operativeTurn &&
+                    <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+                  }
+                </div>
               </>
           }
 
         </div>
-        <div>
+        <div className='flex flex-col gap-4'>
           <Button onClick={() => socket.emit('restartGame', { token })}>
             Reiniciar jogo
           </Button>
