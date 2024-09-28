@@ -16,7 +16,7 @@ export default function LogChat() {
     const [log, setLog] = useState<any[]>([]);
 
     useEffect(() => {
-        if (socket && connected && token) {
+        if (socket) {
             socket.on('roomLog', (log) => {
                 setLog(log);
             })

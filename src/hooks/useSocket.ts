@@ -6,6 +6,7 @@ let socket: Socket | null = null;
 const useSocket = () => {
 
     // const [socket, setSocket] = useState<Socket | null>(null);
+    const socketRef = useRef<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
     const [token, setToken] = useState<string>('');
 
@@ -30,10 +31,10 @@ const useSocket = () => {
         })
 
         return () => {
-            if (socket) {
-                socket.disconnect();
-                socket = null;
-            }
+            // if (socket) {
+            //     socket.disconnect();
+            //     socket = null;
+            // }
         };
     }, [socket]);
 

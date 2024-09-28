@@ -28,7 +28,7 @@ export default function Chat() {
     }
 
     useEffect(() => {
-        if (socket && connected && token) {
+        if (socket) {
             socket.on('chatUpdate', (newChat: Message[]) => {
                 setChat(newChat);
             })
