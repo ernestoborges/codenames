@@ -16,7 +16,7 @@ export default function ToggleButton({
     return (
         <>
             <div
-                className={`font-bold py-1 px-2 cursor-pointer text-base rounded-lg ${className}`}
+                className={`py-1 px-2 cursor-pointer rounded-lg ${className}`}
                 style={{
                     backgroundColor: value ? color2 : "#80808050",
                     color: value ? color1 : "#a4a4a4"

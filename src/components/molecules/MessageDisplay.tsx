@@ -1,7 +1,11 @@
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export default function MessageDisplay({
-    children
+    children,
+    className
+}: {
+    children: React.ReactNode,
+    className?: string
 }) {
 
     const messagesEndRef = useRef(null);
@@ -28,7 +32,7 @@ export default function MessageDisplay({
     return (
         <>
             <ul
-                className="flex flex-col w-full h-full overflow-y-scroll text-2xl"
+                className={`flex flex-col w-full h-full overflow-y-scroll text-2xl ${className}`}
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
             >

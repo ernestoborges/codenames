@@ -31,10 +31,98 @@ export default function LogChat() {
         }
     }, [socket, connected, token])
 
+    const handleSystemLog = ({ type }) => {
+        switch (type) {
+            case 'gameStart': return 'Jogo iniciado'
+            case 'gameOver': return 'Fim de jogo'
+            case 'roomCreated': return 'Sala criada'
+            case 'gameReset': return 'Partida reiniciada'
+            case 'teamsReset': return 'Times redefinidos'
+            case 'endTurn': return 'Turno encerrado'
+        }
+    }
+
+    const handlePlayerLog = ({ data, event }) => {
+        switch (event) {
+            case "connected": return "se conectou";
+            case "disconnected": return "desconectou";
+            case "changeTeamRole": return <>
+                <span className="text-[#ffffff99]">mudou para</span>
+                <div>{data.role}</div>
+                <span className="text-[#ffffff99]">no time </span>
+                <div>{data.team}</div>
+            </>
+            case "enteredRoom": return "entrou na sala"
+        }
+    }
+
+    const handleActionLog = ({ flip, clue, endTurn }) => {
+        if (flip) {
+            return <>
+                <span className="text-[#ffffff99]">
+                    {"virou a carta"}
+                </span>
+                <div className="bg-[#00000044] px-2 py-1 rounded-lg">
+                    {flip.word}
+                </div>
+            </>
+        }
+        if (clue) {
+            return <>
+                <span className="text-[#ffffff99]">
+                    {" deu a palavra-chave: "}
+                </span>
+                <div className="bg-[#00000044] px-2 py-1 rounded-lg">
+                    {clue.word}
+                </div>
+                <div className="bg-[#00000044] px-2 py-1 rounded-lg">
+                    {clue.number}
+                </div>
+            </>
+        }
+        if (endTurn) {
+            return <>
+                <span className="text-[#ffffff99]">
+                    {" encerrou o turno"}
+                </span>
+            </>
+        }
+    }
+
+    const handleLogText = log => {
+        switch (log.type) {
+            case 'action': return <>
+                <div
+                    className={`${log.details.action.player.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
+                >
+                    <span className="font-bold">
+                        {log.details.action.player.username}
+                    </span>
+                    {handleActionLog(log.details.action)}
+                </div>
+            </>
+            case 'player': return <>
+                <div
+                    className={`${true ? '' : log.details.player.data.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
+                >
+                    <span className="font-bold">
+                        {log.details.player.data.username}
+                    </span>
+                    {handlePlayerLog(log.details.player)}
+                </div>
+            </>
+            case 'system': return <>
+                <div className="w-full h-full break-words py-1 px-4 flex gap-2 items-center">
+                    {handleSystemLog(log.details.system)}
+                </div>
+            </>
+        }
+    }
+
     return (
-        <div className="border rounded-lg p-4 flex flex-col gap-4 items-center w-[30rem] h-[20rem]">
-            <div className="w-full">
-                <ul className="w-full flex gap-4">
+        <div className="border rounded-lg flex flex-col gap-4 items-center h-[20rem]">
+            <div className="w-full p-4">
+                <ul className="w-full flex gap-4 text-sm font-bold">
                     <li>
                         <ToggleButton
                             onClick={() => setFilter(prev => ({ ...prev, all: !prev.all }))}
@@ -69,23 +157,21 @@ export default function LogChat() {
                     </li>
                 </ul>
             </div>
-            <MessageDisplay>
+            <MessageDisplay className="text-base px-0">
                 {
-                    log.filter(c => {
+                    log.filter(m => {
                         if (filter.all) {
                             return true
                         } else {
-                            switch (c.type) {
+                            switch (m.type) {
                                 case 'action': return filter.action
                                 case 'player': return filter.player
                                 case 'system': return filter.system
                             }
                         }
-                    }).map((c, i) =>
+                    }).map((m, i) =>
                         <li key={i}>
-                            <div className="break-words">
-                                <span className="font-bold">{c.message}</span>
-                            </div>
+                            {handleLogText(m)}
                         </li>
                     )
                 }
