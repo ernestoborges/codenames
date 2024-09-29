@@ -120,7 +120,7 @@ export default function LogChat() {
     }
 
     return (
-        <div className="border rounded-lg flex flex-col gap-4 items-center h-[20rem]">
+        <div className="border rounded-lg flex flex-col gap-4 items-center h-[36rem]">
             <div className="w-full p-4">
                 <ul className="w-full flex gap-4 text-sm font-bold">
                     <li>

@@ -34,7 +34,7 @@ export default function Chat() {
     }, [socket, connected, token])
 
     return (
-        <div className="border rounded-lg p-4 flex flex-col gap-4 items-center h-[36rem]">
+        <div className="border rounded-lg p-4 flex flex-col gap-4 items-center h-[20rem]">
             <MessageDisplay className="text-lg">
                 {
                     chat.map((c, i) =>
