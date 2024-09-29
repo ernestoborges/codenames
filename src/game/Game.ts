@@ -1,11 +1,5 @@
-import { Socket, Server } from 'socket.io';
-import { v4 as uuidv4 } from 'uuid';
 import { RandomWords, shuffleList } from '../utils/functions';
-import { generateToken, verifyToken } from '../utils/token';
 import { Player } from './Player';
-import { GameRoom } from './GameRoom';
-
-
 
 export class Game {
     private log
@@ -47,7 +41,19 @@ export class Game {
         const card = this.board[position];
         card.hidden = false;
         const opponentTeam = team === 1 ? 2 : 1
-        this.log('action', `${player.username} virou a carta ${card.color === 0 ? 'cinza' : card.color === 1 ? 'azul' : card.color === 2 ? 'vermelha' : 'preta'}: ${card.word}`, { action: { player, flip: { word: card.word, color: card.color } } })
+        this.log('action', `${player.username} virou a carta ${card.color === 0 ? 'cinza' : card.color === 1 ? 'azul' : card.color === 2 ? 'vermelha' : 'preta'}: ${card.word}`, {
+            action: {
+                player: {
+                    role: player.role,
+                    team: player.team,
+                    username: player.username,
+                },
+                flip: {
+                    word: card.word,
+                    color: card.color
+                }
+            }
+        })
         switch (card.color) {
             case 0: // gray card
                 this.endTurn();
@@ -57,6 +63,7 @@ export class Game {
                 {
                     this.clue.remaining--
                     if (team === card.color) { // own team card
+                        console.log('ponto meu, time: ' + team)
                         this.teamsScore[team === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[team === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(team)
@@ -64,6 +71,7 @@ export class Game {
                             this.endTurn();
                         }
                     } else {  // opponent's card
+                        console.log('ponto do outro, time: ' + opponentTeam)
                         this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(opponentTeam)
@@ -105,11 +113,11 @@ export class Game {
 
     startGame() {
         const words = RandomWords(25);
-        const timeInicial = Math.random() < 0.5 ? 1 : 2;
-        const timeIniciais = timeInicial === 1 ? 9 : 8;
-        const timeOpostos = timeInicial === 1 ? 8 : 9;
+        const firstTeam = Math.random() < 0.5 ? 1 : 2;
+        const nCardsTeam1 = firstTeam === 1 ? 9 : 8;
+        const nCardsTeam2 = firstTeam === 1 ? 8 : 9;
 
-        const cores = [3, ...Array(timeIniciais).fill(timeInicial), ...Array(timeOpostos).fill(timeInicial === 1 ? 2 : 1), ...Array(7).fill(0)];
+        const cores = [3, ...Array(nCardsTeam1).fill(1), ...Array(nCardsTeam2).fill(2), ...Array(7).fill(0)];
         const coresEmbaralhadas = shuffleList(cores);
 
         const cards = words.map((word, i) => ({
@@ -121,12 +129,12 @@ export class Game {
         }));
 
 
-        this.turn = timeInicial
+        this.turn = firstTeam
         this.phase = 1
         this.clue = { word: '', number: 0, remaining: 0 }
         this.teamsScore = {
-            team1: timeInicial === 1 ? 9 : 8,
-            team2: timeInicial === 1 ? 8 : 9
+            team1: nCardsTeam1,
+            team2: nCardsTeam2
         }
         this.board = cards
         this.winner = 0

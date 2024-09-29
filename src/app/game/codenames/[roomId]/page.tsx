@@ -8,6 +8,8 @@ import GameTeamSection from '../../../../components/organism/GameTeamSection';
 import Chat from '../../../../components/organism/Chat';
 import GameBoard from '../../../../components/organism/GameBoard';
 import LogChat from '../../../../components/organism/LogChat';
+import ScoreBoard from '../../../../components/organism/ScoreBoard';
+import ClueInput from '../../../../components/molecules/ClueInput';
 
 interface Player {
   id: string;
@@ -67,8 +69,7 @@ export default function Room() {
     operativeTurn: false
   });
 
-  const [clueWordInput, setClueWordInput] = useState<string>('');
-  const [clueNumberInput, setClueNumberInput] = useState<number>(0);
+  
 
   const handleJoinRoom = () => {
     if (socket && username) {
@@ -135,7 +136,7 @@ export default function Room() {
         <span>Referencias: {gameState.clue.number}</span>
         <span>Chances: {gameState.clue.remaining}</span>
       </div> */}
-      <div className='flex gap-2 items-center justify-between'>
+      <div className='flex gap-2 items-start justify-between'>
         <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
           <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} roomState={roomState} />
           <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} roomState={roomState} />
@@ -161,35 +162,22 @@ export default function Room() {
               </>
               :
               <>
-                <div className='flex flex-col items-center'>
-                  <GameBoard cards={gameState.board} />
+                <div className='flex flex-col items-center gap-4'>
+                  <ScoreBoard gameState={gameState} />
+                  <GameBoard cards={gameState.board} operativeTurn={gameState.operativeTurn} />
                   {
                     gameState.spymasterTurn &&
-                    <div>
-                      <input value={clueWordInput} onChange={(e) => setClueWordInput(e.target.value)} />
-                      <select onChange={(e) => setClueNumberInput(Number(e.target.value))}>
-                        {Array.from({ length: (gameState.turn === 1 ? gameState.teamsScore.team1 : gameState.teamsScore.team2) + 1 }, (_, i) => (
-                          <option key={i} value={i}>
-                            {i}
-                          </option>
-                        ))}
-                        <option value={-1}>
-                          infinito
-                        </option>
-                      </select>
-                      <Button onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
-                    </div>
+                    <ClueInput gameState={gameState} />
                   }
                   {
                     gameState.operativeTurn &&
-                    <Button onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+                    <Button className='px-4' onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
                   }
                 </div>
               </>
           }
-
         </div>
-        <div className='flex flex-col gap-4'>
+        <div className='flex flex-col gap-4 w-[24rem]'>
           <Button onClick={() => socket.emit('restartGame', { token })}>
             Reiniciar jogo
           </Button>

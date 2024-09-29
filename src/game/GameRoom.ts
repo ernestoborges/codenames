@@ -51,16 +51,25 @@ export class GameRoom {
         this.emitLog()
     }
 
-    emitLog(){
+    emitLog() {
         this.io.to(this.id).emit('roomLog', this.roomLog)
     }
 
     addPlayer(player: Player) {
         this.players.push(player);
-        this.log('player', `${player.username} entrou na sala.`, { player, event: 'enteredRoom' })
         this.emitGameState(player.socket);
         this.emitRoomState(player.socket);
         this.emitPlayers();
+        this.log('player', `${player.username} entrou na sala.`, {
+            player: {
+                data: {
+                    role: player.role,
+                    team: player.team,
+                    username: player.username,
+                },
+                event: 'enteredRoom'
+            }
+        })
         console.log(`${player.username} entrou na sala ${this.name}`);
     }
 
@@ -109,12 +118,21 @@ export class GameRoom {
     updatePlayerTeamAndRole(id: string, team: number, role: string) {
         const player = this.players.find(p => p.id === id);
         if (!player) return
-        if (this.status === 'playing' && player.role !== 'spectator') return
+        // if (this.status === 'playing' && player.role !== 'spectator') return
 
         player.role = role;
         player.team = team;
 
-        this.log('player', `${player.username} mudou para ${player.role} do time ${player.team}.`, { player, event: 'changeTeamRole' })
+        this.log('player', `${player.username} mudou para ${player.role} do time ${player.team}.`, {
+            player: {
+                data: {
+                    role: player.role,
+                    team: player.team,
+                    username: player.username,
+                },
+                event: 'changeTeamRole'
+            }
+        })
         this.emitPlayers();
         this.emitGameState(player.socket)
         console.log(`${player.username} atualizado: role[${player.role}] e team[${player.team}]`);
@@ -131,7 +149,16 @@ export class GameRoom {
         if (player) {
             player.connected = true;
             this.emitPlayers();
-            this.log('player', `${player.username} está online.`, { player, event: 'connected' })
+            this.log('player', `${player.username} está online.`, {
+                player: {
+                    data: {
+                        role: player.role,
+                        team: player.team,
+                        username: player.username
+                    },
+                    event: 'connected'
+                }
+            })
             console.log(`${player.username} está online`);
         }
     }
@@ -141,7 +168,16 @@ export class GameRoom {
         if (player) {
             player.connected = false;
             this.emitPlayers();
-            this.log('player', `${player.username} desconectado.`, { player, event: 'disconnected' })
+            this.log('player', `${player.username} desconectado.`, {
+                player: {
+                    data: {
+                        role: player.role,
+                        team: player.team,
+                        username: player.username
+                    },
+                    event: 'disconnected'
+                }
+            })
             console.log(`${player.username} está offline`);
         }
     }
@@ -236,13 +272,13 @@ export class GameRoom {
             p.role = 'spectator'
             p.team = 0
         })
-        this.log('system', 'Os times foram redefinidos', {type: 'teamsReset'})
+        this.log('system', 'Os times foram redefinidos', { system: { type: 'teamsReset' } })
         this.emitPlayers();
     }
 
     restartGame() {
         this.status = 'waiting';
-        this.log('system', 'Partida reiniciada', {type: 'gameReset'})
+        this.log('system', 'Partida reiniciada', { system: { type: 'gameReset' } })
         this.emitRoomState();
     }
 }

@@ -12,8 +12,6 @@ interface Message {
 
 export default function Chat() {
 
-
-
     const { socket, token, connected } = useSocket();
     const [chat, setChat] = useState<Message[]>([]);
     const [message, setMessage] = useState<string>("");
@@ -36,9 +34,8 @@ export default function Chat() {
     }, [socket, connected, token])
 
     return (
-        <div className="border rounded-lg p-4 flex flex-col gap-4 items-center w-[30rem] h-[36rem]">
-            <MessageDisplay>
-
+        <div className="border rounded-lg p-4 flex flex-col gap-4 items-center h-[36rem]">
+            <MessageDisplay className="text-lg">
                 {
                     chat.map((c, i) =>
                         <li key={i}>

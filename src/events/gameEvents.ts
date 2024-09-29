@@ -64,7 +64,15 @@ export const handleGameEvents = (socket: Socket) => {
             game.log(
                 'action',
                 `${player.username} deu a dica [${game.gameState.clue.word}][${game.gameState.clue.number}]`,
-                { action: { player, clue: { word: game.gameState.clue.word, number: game.gameState.clue.number } } }
+                {
+                    action: {
+                        player: {
+                            role: player.role,
+                            team: player.team,
+                            username: player.username
+                        }, clue: { word: game.gameState.clue.word, number: game.gameState.clue.number }
+                    }
+                }
             )
             game.emitGameState();
         }
@@ -130,7 +138,16 @@ export const handleGameEvents = (socket: Socket) => {
             game.log(
                 'action',
                 `${player.username} encerrou o turno.`,
-                { action: { player, endTurn: true } }
+                {
+                    action: {
+                        player: {
+                            role: player.role,
+                            team: player.team,
+                            username: player.username
+                        },
+                        endTurn: true
+                    }
+                }
             )
             game.emitGameState();
         }
