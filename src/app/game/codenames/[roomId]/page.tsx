@@ -46,9 +46,9 @@ export default function Room() {
   const { roomId } = useParams();
   const { socket, connected, token, updateToken } = useSocket();
 
+  const [checkin, setCheckin] = useState<boolean>(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [username, setUsername] = useState<string>("");
-  const [checkin, setCheckin] = useState<boolean>(false);
   const [roomState, setRoomState] = useState<RoomState>({
     name: '',
     status: 'waiting'
@@ -122,6 +122,7 @@ export default function Room() {
       </div>
     )
   }
+
   return (
     <div
       className="p-4 h-screen"

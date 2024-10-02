@@ -61,19 +61,14 @@ export const handleGameEvents = (socket: Socket) => {
             game.gameState.clue.number = number < 0 ? -1 : number
             game.gameState.clue.remaining = number + 1
             game.gameState.phase = 2
-            game.log(
-                'action',
-                `${player.username} deu a dica [${game.gameState.clue.word}][${game.gameState.clue.number}]`,
-                {
-                    action: {
-                        player: {
-                            role: player.role,
-                            team: player.team,
-                            username: player.username
-                        }, clue: { word: game.gameState.clue.word, number: game.gameState.clue.number }
-                    }
-                }
-            )
+            game.log.addActionLog({
+                player: {
+                    role: player.role,
+                    team: player.team,
+                    username: player.username
+                },
+                clue: { word: game.gameState.clue.word, number: game.gameState.clue.number }
+            })
             game.emitGameState();
         }
         catch (error) {
@@ -135,20 +130,14 @@ export const handleGameEvents = (socket: Socket) => {
             if (player.team !== game.gameState.turn) throw new Error('Não é seu turno');
 
             game.gameState.endTurn();
-            game.log(
-                'action',
-                `${player.username} encerrou o turno.`,
-                {
-                    action: {
-                        player: {
-                            role: player.role,
-                            team: player.team,
-                            username: player.username
-                        },
-                        endTurn: true
-                    }
-                }
-            )
+            game.log.addActionLog({
+                player: {
+                    role: player.role,
+                    team: player.team,
+                    username: player.username
+                },
+                endTurn: true
+            })
             game.emitGameState();
         }
         catch (error) {

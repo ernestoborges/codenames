@@ -4,13 +4,6 @@ import useSocket from "../../hooks/useSocket"
 import MessageDisplay from "../molecules/MessageDisplay";
 import ToggleButton from "../atoms/ToggleButton";
 
-interface Message {
-    sender: string,
-    me: boolean,
-    message: string,
-    timestamp: string
-}
-
 export default function LogChat() {
 
     const { socket, token, connected } = useSocket();
@@ -31,8 +24,8 @@ export default function LogChat() {
         }
     }, [socket, connected, token])
 
-    const handleSystemLog = ({ type }) => {
-        switch (type) {
+    const handleSystemLog = (event) => {
+        switch (event) {
             case 'gameStart': return 'Jogo iniciado'
             case 'gameOver': return 'Fim de jogo'
             case 'roomCreated': return 'Sala criada'
@@ -42,15 +35,15 @@ export default function LogChat() {
         }
     }
 
-    const handlePlayerLog = ({ data, event }) => {
+    const handlePlayerLog = (player, event) => {
         switch (event) {
             case "connected": return "se conectou";
             case "disconnected": return "desconectou";
             case "changeTeamRole": return <>
                 <span className="text-[#ffffff99]">mudou para</span>
-                <div>{data.role}</div>
+                <div>{player.role}</div>
                 <span className="text-[#ffffff99]">no time </span>
-                <div>{data.team}</div>
+                <div>{player.team}</div>
             </>
             case "enteredRoom": return "entrou na sala"
         }
@@ -93,27 +86,27 @@ export default function LogChat() {
         switch (log.type) {
             case 'action': return <>
                 <div
-                    className={`${log.details.action.player.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
+                    className={`${log.player.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
                 >
                     <span className="font-bold">
-                        {log.details.action.player.username}
+                        {log.player.username}
                     </span>
-                    {handleActionLog(log.details.action)}
+                    {handleActionLog(log)}
                 </div>
             </>
             case 'player': return <>
                 <div
-                    className={`${true ? '' : log.details.player.data.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
+                    className={`${log.player.team === 0 ? '' : log.player.team === 1 ? "bg-[#143464aa]" : "bg-[#b4202aaa]"} w-full h-full break-words py-1 px-4 flex gap-2 items-center`}
                 >
                     <span className="font-bold">
-                        {log.details.player.data.username}
+                        {log.player.username}
                     </span>
-                    {handlePlayerLog(log.details.player)}
+                    {handlePlayerLog(log.player, log.event)}
                 </div>
             </>
             case 'system': return <>
                 <div className="w-full h-full break-words py-1 px-4 flex gap-2 items-center">
-                    {handleSystemLog(log.details.system)}
+                    {handleSystemLog(log.event)}
                 </div>
             </>
         }

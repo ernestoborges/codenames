@@ -9,6 +9,8 @@ const useSocket = () => {
     const socketRef = useRef<Socket | null>(null);
     const [connected, setConnected] = useState<boolean>(false);
     const [token, setToken] = useState<string>('');
+    const [checkin, setCheckin] = useState<boolean>(false);
+
 
     useEffect(() => {
         if (!socket) {

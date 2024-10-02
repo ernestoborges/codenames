@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 export default function Lobby() {
 
-    const { socket, connected, token} = useSocket();
+    const { socket, connected, token, updateToken } = useSocket();
     const router = useRouter();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
@@ -19,6 +19,24 @@ export default function Lobby() {
             })
         }
     }, [socket, connected])
+
+    const handleCreateRoom = async () => {
+        try {
+            const response = await fetch('/api/create-room', {
+
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', },
+                body: JSON.stringify({ roomName, playerName: username }),
+            });
+            const data = await response.json();
+            if (response.ok) {
+                updateToken(data.token);
+                router.push(`/game/codenames/${data.roomId}`);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     return (
         <div>

@@ -17,19 +17,17 @@ export const handleChatEvents = (socket: Socket, io: Server) => {
         }
 
         const { uuid, roomId } = decodedToken;
-        
-        const game = roomManager.getRoom(roomId)
-        if (!game) {
+
+        const room = roomManager.getRoom(roomId)
+        if (!room) {
             socket.emit('error', 'Sala não encontrada');
             return;
         }
 
-        const player = game.getPlayer(uuid)
-        if (!player) {
-            socket.emit('error', 'Jogador não encontrado');
-            return;
+        const player = room.getPlayer(uuid)
+        if (player) {
+            room.addChatMessage(player, message);
+            io.to(roomId).emit('chatUpdate', room.getChatMessages());
         }
-
-        game.addChatMessage(player, message);
     });
 };

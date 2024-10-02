@@ -1,8 +1,10 @@
+import { LogEvent } from '../types/logTypes';
 import { RandomWords, shuffleList } from '../utils/functions';
+import { Log } from './Log';
 import { Player } from './Player';
 
 export class Game {
-    private log
+    private log: Log
     turn: number
     phase: number
     clue: {
@@ -41,19 +43,20 @@ export class Game {
         const card = this.board[position];
         card.hidden = false;
         const opponentTeam = team === 1 ? 2 : 1
-        this.log('action', `${player.username} virou a carta ${card.color === 0 ? 'cinza' : card.color === 1 ? 'azul' : card.color === 2 ? 'vermelha' : 'preta'}: ${card.word}`, {
-            action: {
-                player: {
-                    role: player.role,
-                    team: player.team,
-                    username: player.username,
-                },
-                flip: {
-                    word: card.word,
-                    color: card.color
-                }
+
+        const logEvent = {
+            player: {
+                role: player.role,
+                team: player.team,
+                username: player.username,
+            },
+            flip: {
+                word: card.word,
+                color: card.color
             }
-        })
+        }
+        this.log.addActionLog(logEvent)
+
         switch (card.color) {
             case 0: // gray card
                 this.endTurn();
@@ -108,7 +111,7 @@ export class Game {
         this.turn = this.turn === 1 ? 2 : 1;
         this.phase = 1;
         this.clue = { word: '', number: 0, remaining: 0 };
-        this.log('system', `Turno do time ${this.turn}`, { system: { type: 'endTurn' } })
+        this.log.addSystemLog('endTurn')
     }
 
     startGame() {
@@ -139,11 +142,11 @@ export class Game {
         this.board = cards
         this.winner = 0
 
-        this.log('system', `Jogo iniciado`, { system: { type: 'gameStart' } })
+        this.log.addSystemLog('gameStart')
     }
 
     restartGame() {
-        this.log('system', `Jogo reiniciado`, { system: { type: 'gameRestart' } })
+        this.log.addSystemLog('gameReset')
         this.startGame()
     }
 }

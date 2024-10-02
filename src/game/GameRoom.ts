@@ -1,58 +1,50 @@
 import { Server } from 'socket.io';
 import { Player } from './Player';
 import { Game } from './Game';
+import { Chat } from './Chat';
+import { Log } from './Log';
+import { getSocketServerInstance } from '../socket';
 
 
 export class GameRoom {
-    private io: Server;
     public players: Player[] = [];
     public gameState: Game;
     public status: 'waiting' | 'playing';
-    public roomLog: {
-        type: 'action' | 'player' | 'error' | 'system';
-        details: {
-            player?: {
-                data: Player,
-                event: 'connected' | 'disconnected' | 'changeTeamRole' | 'enteredRoom'
-            },
-            action?: {
-                player: Player,
-                clue?: { word: string, number: number },
-                flip?: { word: string, color: number },
-                endTurn?: boolean
-            },
-            system?: {
-                type: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset' | 'endTurn'
-            }
-        }
-        message: string;
-        timestamp: Date
-    }[] = [];
-    public chat: {
-        senderId: string,
-        sender: string,
-        message: string,
-        timestamp: Date
-    }[] = [];
+    public log: Log;
+    private chat: Chat;
 
-    constructor(io: Server, public id: string, public name: string) {
-        this.io = io;
+    constructor(public id: string, public name: string) {
         this.status = 'waiting';
-        this.gameState = new Game(this.log.bind(this));
+        this.chat = new Chat();
+        this.log = new Log(this.id);
+        this.gameState = new Game(this.log);
+        this.log.addSystemLog('roomCreated')
     }
 
-    log(type: 'action' | 'player' | 'error' | 'system', message: string, details) {
-        this.roomLog.push({
-            type,
-            details,
-            message,
-            timestamp: new Date()
-        })
-        this.emitLog()
+    // log(type: 'action' | 'player' | 'error' | 'system', message: string, details) {
+    //     this.roomLog.push({
+    //         type,
+    //         details,
+    //         message,
+    //         timestamp: new Date()
+    //     })
+    //     this.emitLog()
+    // }
+
+    // emitLog() {
+    //     this.io.to(this.id).emit('roomLog', this.roomLog)
+    // }
+
+    private logPlayerEvent(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole') {
+        this.log.addPlayerLog(player, event);
     }
 
-    emitLog() {
-        this.io.to(this.id).emit('roomLog', this.roomLog)
+    private logActionEvent(player: Player, clue?: { word: string, number: number }, flip?: { word: string, color: number }) {
+        this.log.addActionLog({ player, clue, flip });
+    }
+
+    private logSystemEvent(event: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset') {
+        this.log.addSystemLog(event);
     }
 
     addPlayer(player: Player) {
@@ -60,55 +52,26 @@ export class GameRoom {
         this.emitGameState(player.socket);
         this.emitRoomState(player.socket);
         this.emitPlayers();
-        this.log('player', `${player.username} entrou na sala.`, {
-            player: {
-                data: {
-                    role: player.role,
-                    team: player.team,
-                    username: player.username,
-                },
-                event: 'enteredRoom'
-            }
-        })
+        this.logPlayerEvent(player, 'connected');
         console.log(`${player.username} entrou na sala ${this.name}`);
     }
 
-    addChatMessage(player: Player, message: string) {
-        const timestamp = new Date();
-        this.chat.push({ senderId: player.id, sender: player.username, message, timestamp });
-        this.emitChat()
+    disconnectPlayer(id: string) {
+        const player = this.players.find(p => p.id === id);
+        if (player) {
+            player.connected = false;
+            this.emitPlayers();
+            this.logPlayerEvent(player, 'disconnected');
+            console.log(`${player.username} está offline`);
+        }
     }
 
-    emitChat(socket?: string) {
+    addChatMessage(player: Player, message: string) {
+        this.chat.addMessage(player.id, player.username, message)
+    }
 
-        if (socket) {
-            const player = this.players.find(p => p.socket === socket)
-
-            if (!player) {
-                this.io.to(socket).emit('error', 'Erro ao atualizar chat');
-                return
-            }
-
-            const chatToSend = this.chat.map(m => ({
-                sender: m.sender,
-                message: m.message,
-                timestamp: m.timestamp,
-                me: m.senderId === player.id
-            }))
-
-            this.io.to(player.socket).emit('chatUpdate', chatToSend);
-        } else {
-            this.players.forEach(p => {
-                const chatToSend = this.chat.map(m => ({
-                    sender: m.sender,
-                    message: m.message,
-                    timestamp: m.timestamp,
-                    me: m.senderId === p.id
-                }))
-
-                this.io.to(p.socket).emit('chatUpdate', chatToSend);
-            })
-        }
+    getChatMessages() {
+        return this.chat.getChatMessages();
     }
 
     getPlayer(id: string) {
@@ -123,16 +86,7 @@ export class GameRoom {
         player.role = role;
         player.team = team;
 
-        this.log('player', `${player.username} mudou para ${player.role} do time ${player.team}.`, {
-            player: {
-                data: {
-                    role: player.role,
-                    team: player.team,
-                    username: player.username,
-                },
-                event: 'changeTeamRole'
-            }
-        })
+        this.logPlayerEvent(player, 'changeTeamRole');
         this.emitPlayers();
         this.emitGameState(player.socket)
         console.log(`${player.username} atualizado: role[${player.role}] e team[${player.team}]`);
@@ -149,36 +103,8 @@ export class GameRoom {
         if (player) {
             player.connected = true;
             this.emitPlayers();
-            this.log('player', `${player.username} está online.`, {
-                player: {
-                    data: {
-                        role: player.role,
-                        team: player.team,
-                        username: player.username
-                    },
-                    event: 'connected'
-                }
-            })
+            this.logPlayerEvent(player, 'connected');
             console.log(`${player.username} está online`);
-        }
-    }
-
-    disconnectPlayer(id: string) {
-        const player = this.players.find(p => p.id === id);
-        if (player) {
-            player.connected = false;
-            this.emitPlayers();
-            this.log('player', `${player.username} desconectado.`, {
-                player: {
-                    data: {
-                        role: player.role,
-                        team: player.team,
-                        username: player.username
-                    },
-                    event: 'disconnected'
-                }
-            })
-            console.log(`${player.username} está offline`);
         }
     }
 
@@ -193,7 +119,7 @@ export class GameRoom {
                 me: me.id === p.id
             }))
 
-            this.io.to(me.socket).emit('roomPlayers', response)
+            getSocketServerInstance().to(me.socket).emit('roomPlayers', response)
         })
     }
 
@@ -201,17 +127,13 @@ export class GameRoom {
         this.players.forEach(p => {
             const gameStateToSend = {
                 ...this.gameState,
-                board: p.role === 'spymaster' ? this.gameState.board : this.gameState.getOperativeCards(),
+                board: (p.role === 'spymaster' || this.gameState.winner) ? this.gameState.board : this.gameState.getOperativeCards(),
                 spymasterTurn: p.role === 'spymaster' && this.gameState.turn === p.team && this.gameState.phase === 1,
                 operativeTurn: p.role === 'operative' && this.gameState.turn === p.team && this.gameState.phase === 2
             };
 
             if (!playerSocket || playerSocket === p.socket)
-                this.io.to(p.socket).emit('gameState', gameStateToSend)
-
-
-            // if (playerSocket === p.socket)
-            //     this.io.to(p.socket).emit('gameState', gameStateToSend)
+                getSocketServerInstance().to(p.socket).emit('gameState', gameStateToSend)
 
         })
     }
@@ -223,9 +145,9 @@ export class GameRoom {
             status: this.status
         }
         if (playerSocket) {
-            this.io.to(playerSocket).emit('roomState', roomStateToSend)
+            getSocketServerInstance().to(playerSocket).emit('roomState', roomStateToSend)
         } else {
-            this.io.to(this.id).emit('roomState', roomStateToSend)
+            getSocketServerInstance().to(this.id).emit('roomState', roomStateToSend)
         }
     }
 
@@ -272,13 +194,13 @@ export class GameRoom {
             p.role = 'spectator'
             p.team = 0
         })
-        this.log('system', 'Os times foram redefinidos', { system: { type: 'teamsReset' } })
+        this.logSystemEvent('teamsReset');
         this.emitPlayers();
     }
 
     restartGame() {
         this.status = 'waiting';
-        this.log('system', 'Partida reiniciada', { system: { type: 'gameReset' } })
+        this.logSystemEvent('gameReset');
         this.emitRoomState();
     }
 }

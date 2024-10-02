@@ -14,7 +14,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         }
 
         const roomId = uuidv4();
-        const newRoom = new GameRoom(io, roomId, roomName);
+        const newRoom = new GameRoom(roomId, roomName);
 
         const avatar = randomNumberExclude([], 1, 47);
         const player = new Player(uuidv4(), playerName, socket.id, avatar, true);
