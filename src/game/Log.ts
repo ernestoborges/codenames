@@ -1,4 +1,4 @@
-import { getSocketServerInstance } from "../socket";
+import { Server } from "socket.io";
 import { ActionLogEvent, LogEvent, PlayerLogEvent, SystemLogEvent } from "../types/logTypes";
 import { Player } from "./Player";
 
@@ -6,12 +6,12 @@ export class Log {
     private logs: LogEvent[] = [];
     private roomId: string
 
-    constructor(id: string) {
+    constructor(id: string, public io: Server) {
         this.roomId = id
     }
     
     emitLog() {
-        getSocketServerInstance().to(this.roomId).emit('roomLog', this.logs)
+        this.io.to(this.roomId).emit('roomLog', this.logs);
     }
 
     addPlayerLog(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole') {

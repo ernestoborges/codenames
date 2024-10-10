@@ -1,14 +1,5 @@
 import { GameRoom } from "./GameRoom";
 
-interface Room {
-    id: string;
-    name: string;
-    players: any[];
-    gameState: any;
-    status: string;
-    winner: number;
-}
-
 class RoomManager {
     private rooms: Map<string, GameRoom> = new Map();
 
@@ -25,5 +16,12 @@ class RoomManager {
     }
 }
 
-const roomManager = new RoomManager();
+let roomManager: RoomManager;
+
+if (!global.roomManager) {
+    global.roomManager = new RoomManager();
+}
+
+roomManager = global.roomManager;
+
 export default roomManager;

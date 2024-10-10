@@ -46,6 +46,7 @@ export default function Room() {
   const { roomId } = useParams();
   const { socket, connected, token, updateToken } = useSocket();
 
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [checkin, setCheckin] = useState<boolean>(false);
   const [players, setPlayers] = useState<Player[]>([]);
   const [username, setUsername] = useState<string>("");
@@ -69,13 +70,17 @@ export default function Room() {
     operativeTurn: false
   });
 
-  
-
   const handleJoinRoom = () => {
     if (socket && username) {
-      socket.emit('joinRoom', { playerName: username, roomId, token });
+      socket.emit('joinRoom');
     }
   };
+
+  useEffect(() => {
+    if (!checkin && token) {
+      handleJoinRoom()
+    }
+  }, [])
 
   useEffect(() => {
     if (connected && socket) {
@@ -93,9 +98,9 @@ export default function Room() {
       })
 
       socket.on('gameState', (gameState) => {
-        // if (!checkin) {
-        //   setCheckin(true)
-        // }
+        if (!checkin) {
+          setCheckin(true)
+        }
         setGameState(gameState);
       })
 

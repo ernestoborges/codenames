@@ -7,93 +7,39 @@ import roomManager from '../game/rooms';
 import { randomNumberExclude } from '../utils/functions';
 
 export const handleRoomEvents = (socket: Socket, io: Server) => {
-    socket.on('createRoom', ({ playerName, roomName }: { playerName: string, roomName: string }) => {
-        if (!playerName || !roomName) {
-            socket.emit('error', 'Nome do jogador ou da sala não enviado');
-            return;
-        }
 
-        const roomId = uuidv4();
-        const newRoom = new GameRoom(roomId, roomName);
+    socket.on('joinRoom', () => {
 
-        const avatar = randomNumberExclude([], 1, 47);
-        const player = new Player(uuidv4(), playerName, socket.id, avatar, true);
+        const { uuid, roomId } = socket.data.user
 
-        newRoom.addPlayer(player);
-        roomManager.addRoom(newRoom);
-
-        const token = generateToken({ roomId, username: playerName, uuid: player.id });
-        socket.emit('token', token);
-
-        newRoom.emitRoomState(player.socket);
-        socket.emit('roomCreated', roomId);
-        console.log(`${playerName} criou a sala ${roomName}`);
-    });
-
-    socket.on('joinRoom', ({ roomId, playerName, token }: { roomId: string; playerName: string; token: string }) => {
-        const game = roomManager.getRoom(roomId);
+        const game = roomManager.getRoom(roomId)
         if (!game) {
             socket.emit('error', 'Sala não encontrada');
             return;
         }
 
-        let decodedToken;
-        if (token) {
-            try {
-                decodedToken = verifyToken(token);
-            } catch (error) {
-                console.log('Token inválido ou não decodificado');
-            }
-        }
-
-        if (decodedToken) {
-            const { uuid } = decodedToken;
-            const player = game.getPlayer(uuid);
-
-            if (player) {
-                game.updatePlayerSocket(player.id, socket.id)
-                console.log(`Cliente reconectado: ${uuid}`);
-                socket.join(roomId);
-                game.connectPlayer(player.id);
-                socket.emit('token', token)
-                game.emitRoomState(player.socket);
-                game.emitGameState(player.socket);
-                console.log(`${player.username} entrou na sala ${roomId}`);
-                return;
-            }
-        }
-
-        if (!playerName) {
-            socket.emit('error', 'Nome de usuário não enviado');
+        console.log("joinroom")
+        console.log(uuid, roomId)
+        const player = game.getPlayer(uuid);
+        if (!player) {
+            socket.emit('error', 'Jogador nao cadastrado');
             return;
         }
 
-        const nameExists = game.players.some(player => player.username === playerName);
-        if (nameExists) {
-            socket.emit('error', 'Nome de usuário já existe na sala');
-            return;
-        }
-
-        const playerAvatars = game.players.map(p => p.avatar)
-        const avatar = randomNumberExclude(playerAvatars, 1, 47);
-        const player = new Player(uuidv4(), playerName, socket.id, avatar);
+        game.updatePlayerSocket(player.id, socket.id)
+        console.log(`Cliente reconectado: ${uuid}`);
         socket.join(roomId);
-        const newToken = generateToken({ roomId, username: playerName, uuid: player.id });
-        socket.emit('token', newToken)
-        game.addPlayer(player);
+        game.connectPlayer(player.id);
         game.emitRoomState(player.socket);
         game.emitGameState(player.socket);
+        console.log(`${player.username} entrou na sala ${roomId}`);
     });
 
-    socket.on('startGame', ({ token, roomId }: { token: string, roomId: string }) => {
+    socket.on('startGame', () => {
         try {
-            const decodedToken = verifyToken(token);
-            if (!decodedToken) throw new Error('Token inválido');
-
-            const { uuid, roomId } = decodedToken;
+            const { uuid, roomId } = socket.data.user;
 
             const game = roomManager.getRoom(roomId);
-
             if (!game) throw new Error('Sala não encontrada');
 
             const player = game.getPlayer(uuid);
@@ -107,18 +53,10 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         }
     });
 
-    socket.on('restartGame', async ({ token }) => {
-
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
-        }
-
-        const { uuid, roomId } = decodedToken;
+    socket.on('restartGame', async () => {
+        const { uuid, roomId } = socket.data.user;
 
         const game = roomManager.getRoom(roomId);
-
         if (!game) {
             socket.emit('error', 'Sala não encontrada');
             return;
@@ -138,7 +76,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         game.restartGame();
     })
 
-    socket.on('updateTeam', async ({ token, team, role }) => {
+    socket.on('updateTeam', async ({ team, role }) => {
 
         if (team !== 0 && team !== 1 && team !== 2) {
             socket.emit('error', `Time inválido: ${team}`);
@@ -150,16 +88,9 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             return;
         }
 
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
-        }
-
-        const { roomId, uuid } = decodedToken;
+        const { uuid, roomId } = socket.data.user
 
         const game = roomManager.getRoom(roomId)
-
         if (!game) {
             socket.emit('error', 'Sala não encontrada');
             return;

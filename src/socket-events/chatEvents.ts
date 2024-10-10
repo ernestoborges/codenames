@@ -1,22 +1,15 @@
 import { Server, Socket } from 'socket.io';
-import { verifyToken } from '../utils/token';
 import roomManager from '../game/rooms';
 
 export const handleChatEvents = (socket: Socket, io: Server) => {
-    socket.on('sendMessage', async ({ message, token }: { message: string; token: string }) => {
+    socket.on('sendMessage', async ({ message }: { message: string }) => {
 
         if (!message) {
             socket.emit('error', 'Mensagem não enviada');
             return;
         }
 
-        const decodedToken = verifyToken(token);
-        if (!decodedToken) {
-            socket.emit('error', 'Token inválido');
-            return;
-        }
-
-        const { uuid, roomId } = decodedToken;
+        let { roomId, uuid } = socket.data.user
 
         const room = roomManager.getRoom(roomId)
         if (!room) {

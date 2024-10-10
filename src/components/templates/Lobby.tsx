@@ -1,24 +1,13 @@
 'use client'
-import { useEffect, useState } from "react";
-import { TextInput } from "../atoms/TextInput";
+import { useState } from "react";
 import Button from "../atoms/Button";
-import useSocket from "../../hooks/useSocket";
 import { useRouter } from "next/navigation";
 
 export default function Lobby() {
 
-    const { socket, connected, token, updateToken } = useSocket();
     const router = useRouter();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
-
-    useEffect(() => {
-        if (socket && connected) {
-            socket.on('roomCreated', (roomId) => {
-                router.push(`/game/codenames/${roomId}`);
-            })
-        }
-    }, [socket, connected])
 
     const handleCreateRoom = async () => {
         try {
@@ -30,7 +19,7 @@ export default function Lobby() {
             });
             const data = await response.json();
             if (response.ok) {
-                updateToken(data.token);
+                localStorage.setItem('token', data.token);
                 router.push(`/game/codenames/${data.roomId}`);
             }
         } catch (error) {
@@ -48,7 +37,7 @@ export default function Lobby() {
                 <p>Nome da sala</p>
                 <input value={roomName} onChange={(e) => setRoomName(e.target.value)} />
             </label>
-            <Button onClick={() => socket.emit('createRoom', { token, playerName: username, roomName })}> Criar Sala</Button>
+            <Button onClick={() => handleCreateRoom()}> Criar Sala</Button>
         </div >
     )
 }

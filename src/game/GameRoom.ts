@@ -3,8 +3,6 @@ import { Player } from './Player';
 import { Game } from './Game';
 import { Chat } from './Chat';
 import { Log } from './Log';
-import { getSocketServerInstance } from '../socket';
-
 
 export class GameRoom {
     public players: Player[] = [];
@@ -13,10 +11,10 @@ export class GameRoom {
     public log: Log;
     private chat: Chat;
 
-    constructor(public id: string, public name: string) {
+    constructor(public id: string, public name: string, public io: Server) {
         this.status = 'waiting';
         this.chat = new Chat();
-        this.log = new Log(this.id);
+        this.log = new Log(this.id, this.io);
         this.gameState = new Game(this.log);
         this.log.addSystemLog('roomCreated')
     }
@@ -110,6 +108,7 @@ export class GameRoom {
 
     emitPlayers() {
         this.players.forEach(me => {
+
             const response = this.players.map(p => ({
                 username: p.username,
                 role: p.role,
@@ -118,23 +117,26 @@ export class GameRoom {
                 avatar: p.avatar,
                 me: me.id === p.id
             }))
-
-            getSocketServerInstance().to(me.socket).emit('roomPlayers', response)
+            if (me.socket)
+                this.io.to(me.socket).emit('roomPlayers', response)
         })
     }
 
     emitGameState(playerSocket?: string) {
         this.players.forEach(p => {
             const gameStateToSend = {
-                ...this.gameState,
+                turn: this.gameState.turn,
+                phase: this.gameState.phase,
+                clue: this.gameState.clue,
+                teamsScore: this.gameState.teamsScore,
+                winner: this.gameState.winner,
                 board: (p.role === 'spymaster' || this.gameState.winner) ? this.gameState.board : this.gameState.getOperativeCards(),
                 spymasterTurn: p.role === 'spymaster' && this.gameState.turn === p.team && this.gameState.phase === 1,
                 operativeTurn: p.role === 'operative' && this.gameState.turn === p.team && this.gameState.phase === 2
             };
-
             if (!playerSocket || playerSocket === p.socket)
-                getSocketServerInstance().to(p.socket).emit('gameState', gameStateToSend)
-
+                if (p.socket)
+                    this.io.to(p.socket).emit('gameState', gameStateToSend)
         })
     }
 
@@ -145,9 +147,9 @@ export class GameRoom {
             status: this.status
         }
         if (playerSocket) {
-            getSocketServerInstance().to(playerSocket).emit('roomState', roomStateToSend)
+            this.io.to(playerSocket).emit('roomState', roomStateToSend)
         } else {
-            getSocketServerInstance().to(this.id).emit('roomState', roomStateToSend)
+            this.io.to(this.id).emit('roomState', roomStateToSend)
         }
     }
 
@@ -169,10 +171,6 @@ export class GameRoom {
                 if (p.role === 'spymaster' && !minimumPlayers.s2) minimumPlayers.s2 = true;
             }
         })
-        console.log(minimumPlayers.o1)
-        console.log(minimumPlayers.s1)
-        console.log(minimumPlayers.o2)
-        console.log(minimumPlayers.s2)
 
         if (
             true

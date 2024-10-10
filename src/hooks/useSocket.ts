@@ -13,12 +13,16 @@ const useSocket = () => {
 
 
     useEffect(() => {
-        if (!socket) {
-            socket = io();
-        }
-
         const storedToken = localStorage.getItem('token');
         setToken(storedToken);
+
+        if (!socket) {
+            socket = io({
+                auth:{
+                    token: storedToken
+                }
+            });
+        }
 
         socket.on('connect', () => {
             setConnected(true);
