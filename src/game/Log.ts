@@ -9,7 +9,7 @@ export class Log {
     constructor(id: string, public io: Server) {
         this.roomId = id
     }
-    
+
     emitLog() {
         this.io.to(this.roomId).emit('roomLog', this.logs);
     }
@@ -54,10 +54,17 @@ export class Log {
         this.emitLog()
     }
 
-    addSystemLog(event: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset' | 'endTurn') {
+    addSystemLog({
+        event,
+        winner
+    }: {
+        event: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset' | 'endTurn'
+        winner?: 1 | 2
+    }) {
         const logEntry: SystemLogEvent = {
             type: 'system',
-            event
+            event,
+            winner
         };
         this.logs.push(logEntry);
         this.emitLog()

@@ -2,10 +2,12 @@
 import { useState } from "react";
 import Button from "../atoms/Button";
 import { useRouter } from "next/navigation";
+import { useTokenContext } from "../../context/token";
 
 export default function Lobby() {
 
     const router = useRouter();
+    const { setToken } = useTokenContext();
     const [username, setUsername] = useState<string>('');
     const [roomName, setRoomName] = useState<string>('');
 
@@ -19,7 +21,7 @@ export default function Lobby() {
             });
             const data = await response.json();
             if (response.ok) {
-                localStorage.setItem('token', data.token);
+                setToken(data.token);
                 router.push(`/game/codenames/${data.roomId}`);
             }
         } catch (error) {

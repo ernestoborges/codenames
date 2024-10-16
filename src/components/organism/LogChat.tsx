@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { IoMdSend } from "react-icons/io";
-import useSocket from "../../hooks/useSocket"
 import MessageDisplay from "../molecules/MessageDisplay";
 import ToggleButton from "../atoms/ToggleButton";
+import { useSocketContext } from "../../context/socket";
+import { useTokenContext } from "../../context/token";
 
 export default function LogChat() {
 
-    const { socket, token, connected } = useSocket();
+    const { socket, connected } = useSocketContext();
+    const { token } = useTokenContext();
     const [log, setLog] = useState<any[]>([]);
     const [filter, setFilter] = useState({
         all: true,
@@ -27,11 +29,11 @@ export default function LogChat() {
     const handleSystemLog = (event) => {
         switch (event) {
             case 'gameStart': return 'Jogo iniciado'
-            case 'gameOver': return 'Fim de jogo'
             case 'roomCreated': return 'Sala criada'
             case 'gameReset': return 'Partida reiniciada'
             case 'teamsReset': return 'Times redefinidos'
             case 'endTurn': return 'Turno encerrado'
+            case 'gameOver': return 'Fim de jogo'
         }
     }
 
@@ -69,7 +71,7 @@ export default function LogChat() {
                     {clue.word}
                 </div>
                 <div className="bg-[#00000044] px-2 py-1 rounded-lg">
-                    {clue.number}
+                    {clue.number < 0 ? "∞" : clue.number}
                 </div>
             </>
         }

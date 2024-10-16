@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { IoMdSend } from "react-icons/io";
-import useSocket from "../../hooks/useSocket"
 import MessageDisplay from "../molecules/MessageDisplay";
+import { useSocketContext } from "../../context/socket";
+import { useTokenContext } from "../../context/token";
 
 interface Message {
     sender: string,
@@ -12,10 +13,10 @@ interface Message {
 
 export default function Chat() {
 
-    const { socket, token, connected } = useSocket();
+    const { socket, connected } = useSocketContext();
+    const { token } = useTokenContext();
     const [chat, setChat] = useState<Message[]>([]);
     const [message, setMessage] = useState<string>("");
-
 
     const handleSendMessage = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -31,7 +32,7 @@ export default function Chat() {
                 setChat(newChat);
             })
         }
-    }, [socket, connected, token])
+    }, [socket, connected])
 
     return (
         <div className="border rounded-lg p-4 flex flex-col gap-4 items-center h-[20rem]">

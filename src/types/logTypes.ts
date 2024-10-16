@@ -19,4 +19,5 @@ export interface ActionLogEvent {
 export interface SystemLogEvent {
     type: 'system';
     event: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset' | 'endTurn';
+    winner?: 1 | 2
 }

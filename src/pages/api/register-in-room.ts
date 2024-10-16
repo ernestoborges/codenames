@@ -10,7 +10,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         return res.status(405).json({ message: 'Método não permitido' });
     }
 
-    const { playerName, roomId } = req.body;
+    const { playerName, roomId, avatar } = req.body;
 
     if (!playerName || !roomId) {
         return res.status(400).json({ message: 'Nome do jogador ou da sala não enviado' });
@@ -20,8 +20,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         const gameRoom = roomManager.getRoom(roomId)
         if (!gameRoom) return res.status(404).json({ message: 'Sala não encontrada' });
 
-        const avatar = randomNumberExclude([], 1, 47);
-        const player = new Player(uuidv4(), playerName, "", avatar, true);
+        const foundPlayer = gameRoom.players.find(p => p.username === playerName)
+        if(foundPlayer) return res.status(403).json({message: 'Já existe um jogador com esse nome'})
+
+        const avatarNumber = avatar ? avatar : randomNumberExclude([], 1, 47);
+        const player = new Player(uuidv4(), playerName, "", avatarNumber, false);
 
         gameRoom.addPlayer(player);
 

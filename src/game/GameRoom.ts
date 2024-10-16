@@ -16,7 +16,7 @@ export class GameRoom {
         this.chat = new Chat();
         this.log = new Log(this.id, this.io);
         this.gameState = new Game(this.log);
-        this.log.addSystemLog('roomCreated')
+        this.log.addSystemLog({ event: 'roomCreated' })
     }
 
     // log(type: 'action' | 'player' | 'error' | 'system', message: string, details) {
@@ -42,7 +42,7 @@ export class GameRoom {
     }
 
     private logSystemEvent(event: 'gameStart' | 'gameOver' | 'roomCreated' | 'gameReset' | 'teamsReset') {
-        this.log.addSystemLog(event);
+        this.log.addSystemLog({ event });
     }
 
     addPlayer(player: Player) {
@@ -51,7 +51,7 @@ export class GameRoom {
         this.emitRoomState(player.socket);
         this.emitPlayers();
         this.logPlayerEvent(player, 'connected');
-        console.log(`${player.username} entrou na sala ${this.name}`);
+        console.log(`${player.username} adicionado na sala ${this.name}`);
     }
 
     disconnectPlayer(id: string) {

@@ -1,10 +1,6 @@
 import { Socket, Server } from 'socket.io';
-import { generateToken, verifyToken } from '../utils/token';
-import { v4 as uuidv4 } from 'uuid';
-import { GameRoom } from '../game/GameRoom';
-import { Player } from '../game/Player';
+import { verifyToken } from '../utils/token';
 import roomManager from '../game/rooms';
-import { randomNumberExclude } from '../utils/functions';
 
 export const handleRoomEvents = (socket: Socket, io: Server) => {
 
@@ -18,8 +14,6 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             return;
         }
 
-        console.log("joinroom")
-        console.log(uuid, roomId)
         const player = game.getPlayer(uuid);
         if (!player) {
             socket.emit('error', 'Jogador nao cadastrado');
@@ -27,7 +21,6 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         }
 
         game.updatePlayerSocket(player.id, socket.id)
-        console.log(`Cliente reconectado: ${uuid}`);
         socket.join(roomId);
         game.connectPlayer(player.id);
         game.emitRoomState(player.socket);

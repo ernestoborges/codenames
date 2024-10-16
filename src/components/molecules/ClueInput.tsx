@@ -1,6 +1,7 @@
 import { useState } from "react";
-import useSocket from "../../hooks/useSocket"
 import Button from "../atoms/Button";
+import { useSocketContext } from "../../context/socket";
+import { useTokenContext } from "../../context/token";
 
 export default function ClueInput({
     gameState
@@ -8,7 +9,8 @@ export default function ClueInput({
     gameState: any
 }) {
 
-    const { socket, token } = useSocket();
+    const { socket } = useSocketContext();
+    const { token } = useTokenContext();
 
     const [clueWordInput, setClueWordInput] = useState<string>('');
     const [clueNumberInput, setClueNumberInput] = useState<number>(0);

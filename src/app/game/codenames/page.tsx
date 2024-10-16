@@ -1,13 +1,12 @@
 'use client'
 
+import RoomCreationForm from "../../../components/organism/RoomCreation"
 import Lobby from "../../../components/templates/Lobby"
 
 export default function CodenamesMain(){
-
-    // const socket = useSocket();
    
     return <>
-        <Lobby />
-        {/* <GameTable /> */}
+        {/* <Lobby /> */}
+        <RoomCreationForm />
     </>
 }

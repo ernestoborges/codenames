@@ -1,10 +1,11 @@
 import { Socket } from "socket.io"
 import Button from "../atoms/Button"
 import PlayerLabel from "../molecules/PlayerLabel"
-import useSocket from "../../hooks/useSocket"
 import PlaceholderLabel from "../molecules/PlaceholderLabel"
 import { useEffect, useState } from "react"
 import { RxEnter } from "react-icons/rx";
+import { useTokenContext } from "../../context/token"
+import { useSocketContext } from "../../context/socket"
 
 export default function GameTeamSection({
     players,
@@ -21,7 +22,8 @@ export default function GameTeamSection({
     }
 }) {
 
-    const { socket, token } = useSocket();
+    const { socket } = useSocketContext();
+    const {token} = useTokenContext();
 
     const me = players.find(p => p.me);
 
@@ -39,8 +41,8 @@ export default function GameTeamSection({
             <div className="flex justify-between items-center bg-white text-black w-full ">
                 <p className="py-2">Operative</p>
                 {
-                    (roomState.status == 'playing' || me.role === 'spectator') &&
-                    (me.team !== team || me.role !== 'operative') &&
+                    (roomState.status == 'playing' || (me && me.role) === 'spectator') &&
+                    (me.team !== team || (me && me.role) !== 'operative') &&
                     <>
                         <Button
                             className="p-2 flex items-center"
@@ -72,8 +74,8 @@ export default function GameTeamSection({
             <div className="flex justify-between items-center bg-white text-black w-full">
                 <p className="py-2">Spymaster</p>
                 {
-                    (roomState.status == 'playing' || me.role === 'spectator') &&
-                    (me.team !== team || me.role !== 'spymaster') &&
+                    (roomState.status == 'playing' || (me && me.role)  === 'spectator') &&
+                    (me.team !== team || (me && me.role)  !== 'spymaster') &&
                     <>
                         <Button
                             className="p-2 flex items-center"

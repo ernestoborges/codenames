@@ -1,4 +1,3 @@
-import { LogEvent } from '../types/logTypes';
 import { RandomWords, shuffleList } from '../utils/functions';
 import { Log } from './Log';
 import { Player } from './Player';
@@ -66,7 +65,6 @@ export class Game {
                 {
                     this.clue.remaining--
                     if (team === card.color) { // own team card
-                        console.log('ponto meu, time: ' + team)
                         this.teamsScore[team === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[team === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(team)
@@ -74,7 +72,6 @@ export class Game {
                             this.endTurn();
                         }
                     } else {  // opponent's card
-                        console.log('ponto do outro, time: ' + opponentTeam)
                         this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2']--
                         if (this.teamsScore[opponentTeam === 1 ? 'team1' : 'team2'] <= 0) {
                             this.gameOver(opponentTeam)
@@ -103,15 +100,16 @@ export class Game {
         return this.board.find(card => card.position === position)
     }
 
-    gameOver(winner: number) {
+    gameOver(winner: 1 | 2) {
         this.winner = winner;
+        this.log.addSystemLog({ event: 'gameOver', winner })
     }
 
     endTurn() {
         this.turn = this.turn === 1 ? 2 : 1;
         this.phase = 1;
         this.clue = { word: '', number: 0, remaining: 0 };
-        this.log.addSystemLog('endTurn')
+        this.log.addSystemLog({ event: 'endTurn' })
     }
 
     startGame() {
@@ -142,11 +140,11 @@ export class Game {
         this.board = cards
         this.winner = 0
 
-        this.log.addSystemLog('gameStart')
+        this.log.addSystemLog({ event: 'gameStart' })
     }
 
     restartGame() {
-        this.log.addSystemLog('gameReset')
+        this.log.addSystemLog({ event: 'gameReset' })
         this.startGame()
     }
 }

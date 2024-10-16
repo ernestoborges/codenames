@@ -1,9 +1,9 @@
-import useSocket from "../../hooks/useSocket"
-import Button from "../atoms/Button";
 import { HiOutlineArrowUturnUp } from "react-icons/hi2";
 import { FaUserSecret } from "react-icons/fa6";
 import { useState } from "react";
 import { MdOutlineStar } from "react-icons/md";
+import { useSocketContext } from "../../context/socket";
+import { useTokenContext } from "../../context/token";
 
 export default function GameCard({
     card,
@@ -17,7 +17,8 @@ export default function GameCard({
     // tips: string[]
 }) {
 
-    const { socket, token } = useSocket();
+    const { socket } = useSocketContext();
+    const { token } = useTokenContext();
     const [hover, setHover] = useState<boolean>(false);
     const [reveal, setReveal] = useState<boolean>(false);
     let color;

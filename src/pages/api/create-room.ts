@@ -11,7 +11,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         return res.status(405).json({ message: 'Método não permitido' });
     }
 
-    const { playerName, roomName } = req.body;
+    const { playerName, roomName, avatar } = req.body;
 
     if (!playerName || !roomName) {
         return res.status(400).json({ message: 'Nome do jogador ou da sala não enviado' });
@@ -20,15 +20,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     try {
         const roomId = uuidv4();
         const newRoom = new GameRoom(roomId, roomName, global.io);
-        console.log("Sala criada: ", newRoom)
 
-        const avatar = randomNumberExclude([], 1, 47);
-        const player = new Player(uuidv4(), playerName, "", avatar, true);
+        const avatarNumber = avatar ? avatar : randomNumberExclude([], 1, 47);
+        const player = new Player(uuidv4(), playerName, "", avatarNumber, true);
 
         newRoom.addPlayer(player);
 
         roomManager.addRoom(newRoom);
-        console.log("Lista de salas: ", roomManager)
 
         const token = generateToken({ roomId, username: playerName, uuid: player.id });
 

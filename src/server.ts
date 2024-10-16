@@ -6,7 +6,7 @@ import { handleChatEvents } from './socket-events/chatEvents';
 import { handleConnection } from './socket-events/connection';
 import { handleRoomEvents } from './socket-events/roomEvents';
 import { handleGameEvents } from './socket-events/gameEvents';
-import {  verifyToken } from './utils/token';
+import { verifyToken } from './utils/token';
 import roomManager from './game/rooms';
 
 const hostname = "localhost"
@@ -35,25 +35,36 @@ app.prepare().then(() => {
 
   io.use((socket, next) => {
 
-    if (!socket.handshake.auth) next(new Error('Não autorizado'))
+    if (!socket.handshake.auth) {
+      console.log('auth nao enviado')
+      return next(new Error('Não autorizado'))
+    }
 
     let { token } = socket.handshake.auth
 
     let decodedToken = verifyToken(token)
-    if (!decodedToken) next(new Error('Não autorizado'))
+    if (!decodedToken) {
+      console.log('token invalido')
+      return next(new Error('Não autorizado'))
+    }
 
     let { uuid, roomId } = decodedToken
     let gameRoom = roomManager.getRoom(roomId)
 
-    if (!gameRoom) next(new Error('Não autorizado'))
+    if (!gameRoom){
+      console.log('sala não encontrada')
+      return next(new Error('Não autorizado'))
+    }
 
     let player = gameRoom.getPlayer(uuid)
-    if (!player) next(new Error('Não autorizado'))
+    if (!player) {
+      console.log('jogador nao encontrado')
+      return next(new Error('Não autorizado'))
+    }
     player.socket = socket.id
-    console.log(player)
 
     socket.data.user = decodedToken
-
+    console.log('passou no middleware')
     next()
   })
 
@@ -62,7 +73,7 @@ app.prepare().then(() => {
   });
 
   io.on('connection', (socket: Socket) => {
-    console.log('Novo cliente conectado', socket.id);
+    console.log('Novo socket conectado: ', socket.id);
 
     handleConnection(socket);
     handleRoomEvents(socket, io);
