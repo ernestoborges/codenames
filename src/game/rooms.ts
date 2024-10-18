@@ -1,6 +1,6 @@
 import { GameRoom } from "./GameRoom";
 
-class RoomManager {
+export class RoomManager {
     private rooms: Map<string, GameRoom> = new Map();
 
     addRoom(room: GameRoom) {

@@ -1,8 +1,5 @@
-import { Socket } from "socket.io"
 import Button from "../atoms/Button"
 import PlayerLabel from "../molecules/PlayerLabel"
-import PlaceholderLabel from "../molecules/PlaceholderLabel"
-import { useEffect, useState } from "react"
 import { RxEnter } from "react-icons/rx";
 import { useTokenContext } from "../../context/token"
 import { useSocketContext } from "../../context/socket"
@@ -23,9 +20,9 @@ export default function GameTeamSection({
 }) {
 
     const { socket } = useSocketContext();
-    const {token} = useTokenContext();
+    const { token } = useTokenContext();
 
-    const me = players.find(p => p.me);
+    const me = players.find((p: any) => p.me);
 
     return <>
         <div
@@ -41,13 +38,13 @@ export default function GameTeamSection({
             <div className="flex justify-between items-center bg-white text-black w-full ">
                 <p className="py-2">Operative</p>
                 {
-                    (roomState.status == 'playing' || (me && me.role) === 'spectator') &&
+                    (roomState.status == 'waiting' || (me && me.role) === 'spectator') &&
                     (me.team !== team || (me && me.role) !== 'operative') &&
                     <>
                         <Button
                             className="p-2 flex items-center"
                             onClick={() => {
-                                socket.emit('updateTeam', { token, team, role: 'operative' })
+                                socket && socket.emit('updateTeam', { token, team, role: 'operative' })
                             }}
                         >
                             <RxEnter />
@@ -57,15 +54,15 @@ export default function GameTeamSection({
             </div>
             <ul>
                 {
-                    players.filter(player => player.team === team && player.role === 'operative').map(player =>
+                    players.filter((player: any) => player.team === team && player.role === 'operative').map((player: any) =>
                         <li key={player.id}>
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }
                 {
-                    Array.from({ length: Math.max(0, 5 - players.filter(player => player.team === team && player.role === 'operative').length) }, (_, i) => (
-                        <li key={1 + i + players.filter(player => player.team === team && player.role === 'operative').length}>
+                    Array.from({ length: Math.max(0, 5 - players.filter((player: any) => player.team === team && player.role === 'operative').length) }, (_, i) => (
+                        <li key={1 + i + players.filter((player: any) => player.team === team && player.role === 'operative').length}>
                             <PlayerLabel isPlaceholder={true} />
                         </li>
                     ))
@@ -74,13 +71,13 @@ export default function GameTeamSection({
             <div className="flex justify-between items-center bg-white text-black w-full">
                 <p className="py-2">Spymaster</p>
                 {
-                    (roomState.status == 'playing' || (me && me.role)  === 'spectator') &&
-                    (me.team !== team || (me && me.role)  !== 'spymaster') &&
+                    (roomState.status == 'waiting' || (me && me.role) === 'spectator') &&
+                    (me.team !== team || (me && me.role) !== 'spymaster') &&
                     <>
                         <Button
                             className="p-2 flex items-center"
                             onClick={() => {
-                                socket.emit('updateTeam', { token, team, role: 'spymaster' })
+                                socket && socket.emit('updateTeam', { token, team, role: 'spymaster' })
                             }}
                         >
                             <RxEnter />
@@ -90,15 +87,15 @@ export default function GameTeamSection({
             </div>
             <ul>
                 {
-                    players.filter(player => player.team === team && player.role === 'spymaster').map(player =>
+                    players.filter((player: any) => player.team === team && player.role === 'spymaster').map((player: any) =>
                         <li key={player.id}>
                             <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }
                 {
-                    Array.from({ length: Math.max(0, 2 - players.filter(player => player.team === team && player.role === 'spymaster').length) }, (_, i) => (
-                        <li key={1 + i + players.filter(player => player.team === team && player.role === 'spymaster').length}>
+                    Array.from({ length: Math.max(0, 2 - players.filter((player: any) => player.team === team && player.role === 'spymaster').length) }, (_, i) => (
+                        <li key={1 + i + players.filter((player: any) => player.team === team && player.role === 'spymaster').length}>
                             <PlayerLabel isPlaceholder={true} />
                         </li>
                     ))

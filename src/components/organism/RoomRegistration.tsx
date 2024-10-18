@@ -8,7 +8,7 @@ import { useTokenContext } from "../../context/token";
 
 
 export default function RoomRegisterForm() {
-    const { roomId } = useParams();
+    const { roomId } = useParams() as { roomId: string };
     const { setToken } = useTokenContext();
     const [username, setUsername] = useState<string>('');
     const [avatar, setAvatar] = useState<number>(Math.floor(Math.random() * 46) + 1);

@@ -34,12 +34,12 @@ export default function GameCard({
             <div
                 className={`w-[154px] h-[90px] flex flex-col items-center justify-center w-aut border-4 border-white text-2xl`}
                 style={{ backgroundColor: card.color !== undefined ? color : '#9c8061' }}
-                onClick={() => { socket.emit('gameTip', { token, cardIndex: card.position }) }}
+                onClick={() => { socket && socket.emit('gameTip', { token, cardIndex: card.position }) }}
             >
                 <div className="flex items-start justify-between flex-grow w-full">
                     <ul className="flex-grow p-1 w-full flex flex-wrap items-start justify-start text-sm overflow-y-auto scrollbar">
                         {
-                            card.tips.map((name, i) =>
+                            card.tips.map((name: string, i: number) =>
                                 <li key={i} className="border px-1 rounded-md">
                                     {name}
                                 </li>)
@@ -51,7 +51,7 @@ export default function GameCard({
                                 className="flex items-center justify-center bg-green-500 border-green-500 border-l border-b p-1 text-3xl cursor-pointer "
                                 onMouseEnter={() => setHover(true)}
                                 onMouseLeave={() => setHover(false)}
-                                onClick={() => socket.emit('gameFlipCard', { token, cardPosition: card.position })}
+                                onClick={() => socket && socket.emit('gameFlipCard', { token, cardPosition: card.position })}
                             >
                                 {
                                     hover

@@ -31,7 +31,7 @@ export const handleGameEvents = (socket: Socket) => {
             game.gameState.flipCard(player, cardPosition)
             game.emitGameState();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });
@@ -71,7 +71,7 @@ export const handleGameEvents = (socket: Socket) => {
             })
             game.emitGameState();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });
@@ -106,7 +106,7 @@ export const handleGameEvents = (socket: Socket) => {
 
             game.emitGameState();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });
@@ -140,7 +140,7 @@ export const handleGameEvents = (socket: Socket) => {
             })
             game.emitGameState();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });

@@ -8,19 +8,23 @@ export default function MessageDisplay({
     className?: string
 }) {
 
-    const messagesEndRef = useRef(null);
-    const messagesContainerRef = useRef(null);
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+    const messagesContainerRef = useRef<HTMLUListElement | null>(null);
 
     const [isUserAtBottom, setIsUserAtBottom] = useState(true);
 
     const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+        if(messagesEndRef && messagesEndRef.current){
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
     const handleScroll = () => {
         const container = messagesContainerRef.current;
-        const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
-        setIsUserAtBottom(isAtBottom);
+        if(container){
+            const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+            setIsUserAtBottom(isAtBottom);
+        }
     };
 
     useEffect(() => {

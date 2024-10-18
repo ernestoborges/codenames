@@ -5,7 +5,7 @@ export function TextInput({
     className
 }: {
     value: string | number
-    onchange: (string) => any
+    onchange: (text: string) => void
     placeholder?: string
     className?: string
 }) {

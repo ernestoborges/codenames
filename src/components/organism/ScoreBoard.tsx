@@ -39,7 +39,7 @@ export default function ScoreBoard({
     )
 }
 
-function Container({ children }) {
+function Container({ children }: { children: React.ReactNode }) {
     return (
         <div className="w-full flex justify-center gap-4">
             {children}
