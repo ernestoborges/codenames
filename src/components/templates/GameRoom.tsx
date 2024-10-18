@@ -42,7 +42,7 @@ interface RoomState {
 export default function GameRoom() {
     const { socket, connected } = useSocketContext();
     const { token } = useTokenContext();
-    const { roomId } = useParams();
+    const { roomId } = useParams() as { roomId: string } ;
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [players, setPlayers] = useState<Player[]>([]);
@@ -75,11 +75,11 @@ export default function GameRoom() {
                 // socket.off('allowCheckin');
             };
         }
-    }, [socket, connected]);
+    }, [socket, connected, isLoading]);
 
     if (isLoading) {
         return <>
-            <button onClick={() => socket.emit('sync')}>sync</button>
+            <button onClick={() => socket && socket.emit('sync')}>sync</button>
             <div>calma po</div>
         </>
     }
@@ -111,10 +111,10 @@ export default function GameRoom() {
                                         Esperando jogadores
                                     </div>
                                     <div className='flex gap-4'>
-                                        <Button onClick={() => socket.emit('gameResetTeams', { token })}>
+                                        <Button onClick={() => socket && socket.emit('gameResetTeams', { token })}>
                                             Reiniciar Time
                                         </Button>
-                                        <Button onClick={() => socket.emit('startGame', { token, roomId })}>
+                                        <Button onClick={() => socket && socket.emit('startGame', { token, roomId })}>
                                             Iniciar Jogo
                                         </Button>
                                     </div>
@@ -131,14 +131,14 @@ export default function GameRoom() {
                                     }
                                     {
                                         gameState.operativeTurn &&
-                                        <Button className='px-4' onClick={() => socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+                                        <Button className='px-4' onClick={() => socket && socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
                                     }
                                 </div>
                             </>
                     }
                 </div>
                 <div className='flex flex-col gap-4 w-[24rem]'>
-                    <Button onClick={() => socket.emit('restartGame', { token })}>
+                    <Button onClick={() => socket && socket.emit('restartGame', { token })}>
                         Reiniciar jogo
                     </Button>
                     <LogChat />

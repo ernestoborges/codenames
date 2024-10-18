@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "node --loader ts-node/esm --experimental-specifier-resolution=node src/server.ts",
-    "build": "next build",
-    "start": "NODE_ENV=production node src/server.ts",
+    "build": "tsc",
+    "start": "node --loader ts-node/esm --experimental-specifier-resolution=node dist/src/server.js",
     "lint": "next lint"
   },
   "dependencies": {

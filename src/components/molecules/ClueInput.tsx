@@ -39,7 +39,7 @@ export default function ClueInput({
                         ∞
                     </option>
                 </select>
-                <Button className="px-4" onClick={() => socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
+                <Button className="px-4" onClick={() => socket && socket.emit('gameClue', { token, word: clueWordInput, number: clueNumberInput })}>Dar dica</Button>
             </div>
         </>
     )

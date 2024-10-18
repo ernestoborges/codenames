@@ -25,8 +25,9 @@ export class Game {
     winner: number
 
     // constructor(room: GameRoom) {
-    constructor(log) {
+    constructor(log: Log) {
         this.turn = 1
+        this.phase = 1
         this.clue = { word: '', number: 0, remaining: 0 }
         this.teamsScore = {
             team1: 0,
@@ -34,6 +35,7 @@ export class Game {
         }
         this.board = []
         this.log = log
+        this.winner = 0
     }
 
     flipCard(player: Player, position: number) {

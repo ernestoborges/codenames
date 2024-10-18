@@ -5,28 +5,20 @@
     "esm": true
   },
   "compilerOptions": {
-    // "target": "ESNext",
+    "outDir": "./dist", // Diretório de saída para os arquivos compilados
+    // "rootDir": "./src", // Diretório raiz onde os arquivos TypeScript estão
+    "module": "esnext", // Use 'esnext' para que funcione bem com ESModules
+    "target": "es2017", // Defina o alvo do JavaScript para o ES2017 ou mais recente
     "lib": [
       "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": false,
-    // "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    // "moduleResolution": "node",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "incremental": true,
-    // "outDir": "./dist",
-    "baseUrl": "./",
-    // "sourceMap": true,
+      "es2017"
+    ], // Libs do JS que você quer suportar
+    "esModuleInterop": true, // Para interoperar com módulos CommonJS
+    "moduleResolution": "node", // Resolução de módulo estilo Node.js
+    "resolveJsonModule": true, // Permite importar arquivos JSON
+    "skipLibCheck": true, // Ignora checagem de bibliotecas para reduzir tempo de build
+    "strict": true, // Habilita todas as verificações de tipo estritas
+    "noImplicitAny": false,
     "plugins": [
       {
         "name": "next"
@@ -37,18 +29,25 @@
         "./src/*"
       ]
     },
-    "strictNullChecks": false
+    "allowJs": true,
+    // "noEmit": true,
+    "incremental": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "noEmit": true
   },
   "include": [
     "next-env.d.ts",
-    "src/**/*",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.tsx",
+    "src/**/*.ts",
     ".next/types/**/*.ts"
+    // ".next/types/**/*.ts"
+    // ".next/types/**/*.ts"
     // "next.config.mts",
     // "next.config.mts"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "dist/**/*"
   ]
 }

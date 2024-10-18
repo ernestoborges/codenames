@@ -26,7 +26,7 @@ export default function LogChat() {
         }
     }, [socket, connected, token])
 
-    const handleSystemLog = (event) => {
+    const handleSystemLog = (event: string) => {
         switch (event) {
             case 'gameStart': return 'Jogo iniciado'
             case 'roomCreated': return 'Sala criada'
@@ -37,7 +37,7 @@ export default function LogChat() {
         }
     }
 
-    const handlePlayerLog = (player, event) => {
+    const handlePlayerLog = (player: any, event: string) => {
         switch (event) {
             case "connected": return "se conectou";
             case "disconnected": return "desconectou";
@@ -51,7 +51,7 @@ export default function LogChat() {
         }
     }
 
-    const handleActionLog = ({ flip, clue, endTurn }) => {
+    const handleActionLog = ({ flip, clue, endTurn }:{flip: any, clue: any, endTurn: any}) => {
         if (flip) {
             return <>
                 <span className="text-[#ffffff99]">
@@ -84,7 +84,7 @@ export default function LogChat() {
         }
     }
 
-    const handleLogText = log => {
+    const handleLogText = (log: any) => {
         switch (log.type) {
             case 'action': return <>
                 <div

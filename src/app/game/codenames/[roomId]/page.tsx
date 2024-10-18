@@ -15,7 +15,7 @@ export default function Room() {
     if (isLoading) {
       setIsLoading(false)
     }
-  }, [token])
+  }, [token, isLoading])
 
   if (isLoading) {
     return <div>carregando</div>

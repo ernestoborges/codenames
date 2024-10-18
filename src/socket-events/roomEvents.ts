@@ -41,7 +41,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
             game.startGame();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });
@@ -115,7 +115,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
 
             game.resetTeams();
         }
-        catch (error) {
+        catch (error: any) {
             socket.emit('error', error.message);
         }
     });
