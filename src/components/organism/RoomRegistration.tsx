@@ -1,10 +1,9 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useState } from "react";
 import { TextInput } from "../atoms/TextInput";
-import Image from 'next/image'
 import Button from "../atoms/Button";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useParams } from 'next/navigation';
 import { useTokenContext } from "../../context/token";
+import AvatarSelector from "../molecules/AvatarSelector";
 
 
 export default function RoomRegisterForm() {
@@ -15,22 +14,6 @@ export default function RoomRegisterForm() {
 
     const handleChangeUsername = (text: string) => {
         setUsername(text)
-    }
-
-    const handlePreviousAvatar = () => {
-        if (avatar - 1 < 1) {
-            setAvatar(47)
-        } else {
-            setAvatar(avatar - 1)
-        }
-    }
-
-    const handleNextAvatar = () => {
-        if (avatar + 1 > 47) {
-            setAvatar(1)
-        } else {
-            setAvatar(avatar + 1)
-        }
     }
 
     const handleSubmit = async () => {
@@ -59,15 +42,7 @@ export default function RoomRegisterForm() {
                     onSubmit={(e) => { e.preventDefault() }}
                     className="flex flex-col items-center gap-8"
                 >
-                    <div className="flex flex-col gap-4">
-                        <div className="relative h-[16rem] w-[16rem] rounded-xl border-2 border-white overflow-hidden">
-                            <Image src={`/avatars/${avatar}.png`} alt="" fill />
-                        </div>
-                        <div className="flex gap-4">
-                            <Button className="px-4 py-2 text-3xl grow" onClick={handlePreviousAvatar}><IoIosArrowBack /></Button>
-                            <Button className="px-4 py-2 text-3xl grow" onClick={handleNextAvatar}><IoIosArrowForward /></Button>
-                        </div>
-                    </div>
+                    <AvatarSelector index={avatar} setIndex={setAvatar} />
                     <label className="flex flex-col gap-2">
                         Nome do Jogador
                         <TextInput value={username} onchange={handleChangeUsername} />
