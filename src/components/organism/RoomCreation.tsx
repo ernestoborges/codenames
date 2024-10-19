@@ -47,7 +47,7 @@ export default function RoomCreationForm() {
 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', },
-                body: JSON.stringify({ roomName, playerName: username }),
+                body: JSON.stringify({ roomName, playerName: username, avatar }),
             });
             const data = await response.json();
             if (response.ok) {

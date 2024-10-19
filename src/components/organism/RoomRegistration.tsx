@@ -40,7 +40,7 @@ export default function RoomRegisterForm() {
                 const response = await fetch('/api/register-in-room', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', },
-                    body: JSON.stringify({ roomId, playerName: username }),
+                    body: JSON.stringify({ roomId, playerName: username, avatar }),
                 });
                 const data = await response.json();
                 if (response.ok) {
