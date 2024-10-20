@@ -93,7 +93,7 @@ export default function Lobby() {
                     const response = await fetch('/api/create-room', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', },
-                        body: JSON.stringify({ roomName, playerName: username, avatar }),
+                        body: JSON.stringify({ roomName, playerName: username, avatar, token }),
                     });
                     const data = await response.json();
                     if (response.ok) {
