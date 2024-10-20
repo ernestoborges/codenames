@@ -23,7 +23,7 @@ export default function Room() {
   }
 
   if (!token) {
-    router.push('/game/codenames')
+    router.push('/')
   }
 
   return (
