@@ -140,7 +140,7 @@ export default function GameRoom() {
                 <div className='flex flex-col gap-4 w-[24rem]'>
                     <div className='flex gap-4 justify-end'>
                         {
-                            players.find((p: any) => p.me).admin &&
+                            players.find((p: any) => p.me)?.admin &&
                             <Button onClick={() => socket && socket.emit('restartGame', { token })}>
                                 Reiniciar jogo
                             </Button>

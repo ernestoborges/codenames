@@ -12,7 +12,7 @@ export default function Lobby() {
 
     const router = useRouter()
     const { token, setToken } = useTokenContext()
-    const [rooms, setRooms] = useState([])
+    const [rooms, setRooms] = useState<{ name: string, id: string, players: string, status: string }[]>([])
     const [username, setUsername] = useState<string>('')
     const [roomName, setRoomName] = useState<string>('')
     const [avatar, setAvatar] = useState<number>(Math.floor(Math.random() * 46) + 1)
@@ -74,7 +74,7 @@ export default function Lobby() {
                     const response = await fetch('/api/register-in-room', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', },
-                        body: JSON.stringify({ playerName: username, avatar, roomId: rooms[selectedRoom].id, token }),
+                        body: JSON.stringify({ playerName: username, avatar, roomId: rooms[selectedRoom]?.id, token }),
                     });
                     const data = await response.json();
                     if (response.ok) {
