@@ -19,8 +19,6 @@ const handle = app.getRequestHandler();
 app.prepare().then(() => {
   const server = express();
   const httpServer = createServer(server);
-  // const io = new Server(httpServer);
-  // const io = initializeSocket(httpServer);
   let io
   if (!global.io) {
     io = new Server(httpServer, {
@@ -28,9 +26,9 @@ app.prepare().then(() => {
         origin: '*',
       },
     });
-    global.io = io; // Armazena globalmente
+    global.io = io;
   } else {
-    io = global.io; // Usa a instância existente
+    io = global.io;
   }
 
   io.use((socket, next) => {

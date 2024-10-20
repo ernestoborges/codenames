@@ -9,6 +9,7 @@ import ScoreBoard from "../organism/ScoreBoard";
 import { useParams } from 'next/navigation';
 import { useSocketContext } from "../../context/socket";
 import { useTokenContext } from "../../context/token";
+import { IoIosClose } from "react-icons/io";
 
 interface Player {
     id: string;
@@ -42,7 +43,7 @@ interface RoomState {
 export default function GameRoom() {
     const { socket, connected } = useSocketContext();
     const { token } = useTokenContext();
-    const { roomId } = useParams() as { roomId: string } ;
+    const { roomId } = useParams() as { roomId: string };
     const [isLoading, setIsLoading] = useState<boolean>(true);
 
     const [players, setPlayers] = useState<Player[]>([]);
@@ -79,7 +80,6 @@ export default function GameRoom() {
 
     if (isLoading) {
         return <>
-            <button onClick={() => socket && socket.emit('sync')}>sync</button>
             <div>calma po</div>
         </>
     }
@@ -138,9 +138,20 @@ export default function GameRoom() {
                     }
                 </div>
                 <div className='flex flex-col gap-4 w-[24rem]'>
-                    <Button onClick={() => socket && socket.emit('restartGame', { token })}>
-                        Reiniciar jogo
-                    </Button>
+                    <div className='flex gap-4 justify-end'>
+                        {
+                            players.find((p: any) => p.me).admin &&
+                            <Button onClick={() => socket && socket.emit('restartGame', { token })}>
+                                Reiniciar jogo
+                            </Button>
+                        }
+                        <Button
+                            onClick={() => socket && socket.emit('leaveRoom')}
+                            className="bg-transparent text-red border-red hover:bg-red hover:text-white"
+                        >
+                            <IoIosClose size={24} />
+                        </Button>
+                    </div>
                     <LogChat />
                     <Chat />
                 </div>

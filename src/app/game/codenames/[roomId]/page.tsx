@@ -1,13 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react';
 import GameRoom from '../../../../components/templates/GameRoom';
-import RoomRegistration from '../../../../components/organism/RoomRegistration';
-import { TokenProvider, useTokenContext } from '../../../../context/token';
+import { useTokenContext } from '../../../../context/token';
 import { SocketProvider } from '../../../../context/socket';
+import { useRouter } from 'next/navigation';
 
 export default function Room() {
 
   const { token } = useTokenContext();
+  const router = useRouter()
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -21,20 +22,13 @@ export default function Room() {
     return <div>carregando</div>
   }
 
-  if (token) {
-    return (
-      <SocketProvider>
-        <GameRoom />
-      </SocketProvider>
-    )
+  if (!token) {
+    router.push('/game/codenames')
   }
 
-  return <div>
-    <RoomRegistration />
-  </div>
-  // <div>
-  //   <input value={username} onChange={(e) => setUsername(e.target.value)} />
-  //   <button onClick={handleJoinRoom}>Entrar</button>
-  // </div>
-
+  return (
+    <SocketProvider>
+      <GameRoom />
+    </SocketProvider>
+  )
 }

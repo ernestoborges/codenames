@@ -112,6 +112,7 @@ export class Game {
         this.phase = 1;
         this.clue = { word: '', number: 0, remaining: 0 };
         this.log.addSystemLog({ event: 'endTurn' })
+        this.board.forEach(card => card.tips = [])
     }
 
     startGame() {

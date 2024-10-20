@@ -28,6 +28,27 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
         console.log(`${player.username} entrou na sala ${roomId}`);
     });
 
+    socket.on('leaveRoom', () => {
+
+        const { uuid, roomId } = socket.data.user
+
+        const game = roomManager.getRoom(roomId)
+        if (!game) {
+            socket.emit('error', 'Sala não encontrada');
+            return;
+        }
+
+        const player = game.getPlayer(uuid);
+        if (!player) {
+            socket.emit('error', 'Jogador nao cadastrado');
+            return;
+        }
+
+        game.removePlayer(player);
+        socket.disconnect(true);
+        console.log(`${player.username} saiu da sala ${roomId}`);
+    });
+
     socket.on('startGame', () => {
         try {
             const { uuid, roomId } = socket.data.user;

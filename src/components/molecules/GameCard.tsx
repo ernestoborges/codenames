@@ -11,10 +11,6 @@ export default function GameCard({
 }: {
     card: any,
     operativeTurn: boolean
-    // title: string,
-    // color?: string,
-    // index: number,
-    // tips: string[]
 }) {
 
     const { socket } = useSocketContext();
