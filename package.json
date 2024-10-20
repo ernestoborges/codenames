@@ -5,8 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "node --loader ts-node/esm --experimental-specifier-resolution=node src/server.ts",
-    "build": "tsc && ls dist",
-    "start": "node --loader ts-node/esm --experimental-specifier-resolution=node ./dist/src/server.js",
+    "build-dev": "tsc && next build",
+    "build-prod": "pnpm install --frozen-lockfile; tsc && next build && ls dist",
+    "start": "node --loader ts-node/esm --experimental-specifier-resolution=node --max_old_space_size=400 ./dist/server.js",
     "lint": "next lint"
   },
   "dependencies": {

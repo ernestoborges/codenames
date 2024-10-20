@@ -51,11 +51,17 @@ export class GameRoom {
         this.emitRoomState(player.socket);
         this.emitPlayers();
         this.logPlayerEvent(player, 'connected');
-        if(player.username){
+        if (player.username) {
             console.log(`${player.username} adicionado na sala ${this.name}`);
         } else {
             console.log(`Jogador sem nome foi adicionado na sala: ${this.name}`);
         }
+    }
+
+    removePlayer(player: Player) {
+        this.players = this.players.filter(p => p.id !== player.id)
+        this.emitPlayers();
+        this.logPlayerEvent(player, 'disconnected');
     }
 
     disconnectPlayer(id: string) {
