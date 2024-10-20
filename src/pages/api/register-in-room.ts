@@ -24,11 +24,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
         if (decodedToken) {
             let { uuid, roomId } = decodedToken
             if (roomId === gameRoom.id) {
-                const foundPlayer = gameRoom.players.find(p => p.id === uuid)
+                const foundPlayer = gameRoom.getPlayer(uuid)
                 if (foundPlayer) {
                     return res.status(200).json({ token, roomId });
                 }
             }
+            const rooms = roomManager.getAllRooms()
+            rooms.forEach(room => {
+                const foundPlayer = room.getPlayer(uuid)
+                if (foundPlayer) {
+                    room.removePlayer(uuid)
+                }
+            })
         }
 
         const foundPlayer = gameRoom.players.find(p => p.username === playerName)
@@ -36,9 +43,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
         const avatarNumber = avatar ? avatar : randomNumberExclude([], 1, 47);
         const player = new Player(uuidv4(), playerName, "", avatarNumber, false);
-
         gameRoom.addPlayer(player);
-
         const newToken = generateToken({ roomId, username: playerName, uuid: player.id });
 
         return res.status(200).json({ token: newToken, roomId });
