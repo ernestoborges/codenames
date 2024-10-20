@@ -3,6 +3,7 @@ import { Player } from './Player';
 import { Game } from './Game';
 import { Chat } from './Chat';
 import { Log } from './Log';
+import roomManager from './rooms';
 
 export class GameRoom {
     public players: Player[] = [];
@@ -58,10 +59,23 @@ export class GameRoom {
         }
     }
 
-    removePlayer(player: Player) {
-        this.players = this.players.filter(p => p.id !== player.id)
-        this.emitPlayers();
-        this.logPlayerEvent(player, 'disconnected');
+    removePlayer(id: string) {
+        const foundPlayer = this.getPlayer(id)
+        if (foundPlayer) {
+            this.players = this.players.filter(p => p.id !== foundPlayer.id)
+
+            if (this.players.length > 0) {
+
+                if (foundPlayer.admin) {
+                    this.players[0].admin = true
+                }
+
+                this.emitPlayers();
+                this.logPlayerEvent(foundPlayer, 'disconnected');
+            } else {
+                roomManager.deleteRoom(this.id)
+            }
+        }
     }
 
     disconnectPlayer(id: string) {

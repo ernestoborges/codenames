@@ -44,7 +44,7 @@ export const handleRoomEvents = (socket: Socket, io: Server) => {
             return;
         }
 
-        game.removePlayer(player);
+        game.removePlayer(player.id);
         socket.disconnect(true);
         console.log(`${player.username} saiu da sala ${roomId}`);
     });

@@ -1,3 +1,5 @@
+'use client'
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useTokenContext } from './token';
@@ -39,7 +41,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       newSocket.on('disconnect', () => {
         setConnected(false);
         console.log('Desconectado do servidor Socket.io');
-        router.push('/game/codenames');
+        router.push('/');
       });
 
       setSocket(newSocket);
