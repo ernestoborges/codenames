@@ -90,22 +90,21 @@ export default function GameRoom() {
 
     return (
         <div
-            className="p-4 h-screen"
+            className="p-4 h-screen flex items-center justify-center"
             style={{
-                // backgroundColor: '#e5e5f7',
                 backgroundImage: 'linear-gradient(0deg, #1a1a1a1a 50%, #3a3a3a3a 50%)',
                 backgroundSize: '10px 10px'
             }}>
-            <div className='flex gap-2 items-start justify-between'>
-                <div className='flex flex-col items-center min-w-[15rem] max-w-[25rem] w-full gap-4'>
+            <div className='flex gap-3 justify-center items-stretch'>
+                <div className='flex flex-col items-center w-[25rem] gap-4'>
                     <GameTeamSection players={players} team={1} score={gameState.teamsScore.team1} roomState={roomState} />
                     <GameTeamSection players={players} team={2} score={gameState.teamsScore.team2} roomState={roomState} />
                 </div>
-                <div className='h-full flex items-center'>
+                <div>
                     {
                         roomState.status === 'waiting'
                             ?
-                            <>
+                            <div className="w-[79rem] flex items-center justify-center h-full">
                                 <div className='bg-gray-100 rounded-sm flex flex-col p-4 gap-4'>
                                     <div className='p-8'>
                                         Esperando jogadores
@@ -119,22 +118,20 @@ export default function GameRoom() {
                                         </Button>
                                     </div>
                                 </div>
-                            </>
+                            </div>
                             :
-                            <>
-                                <div className='flex flex-col items-center gap-4'>
-                                    <ScoreBoard gameState={gameState} />
-                                    <GameBoard cards={gameState.board} operativeTurn={gameState.operativeTurn} />
-                                    {
-                                        gameState.spymasterTurn &&
-                                        <ClueInput gameState={gameState} />
-                                    }
-                                    {
-                                        gameState.operativeTurn &&
-                                        <Button className='px-4' onClick={() => socket && socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
-                                    }
-                                </div>
-                            </>
+                            <div className='flex flex-col items-center gap-4'>
+                                <ScoreBoard gameState={gameState} />
+                                <GameBoard cards={gameState.board} operativeTurn={gameState.operativeTurn} />
+                                {
+                                    gameState.spymasterTurn &&
+                                    <ClueInput gameState={gameState} />
+                                }
+                                {
+                                    gameState.operativeTurn &&
+                                    <Button className='px-4' onClick={() => socket && socket.emit('gameEndTurn', { token })}>Encerrar turno</Button>
+                                }
+                            </div>
                     }
                 </div>
                 <div className='flex flex-col gap-4 w-[24rem]'>
