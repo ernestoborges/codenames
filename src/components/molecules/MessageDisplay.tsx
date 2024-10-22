@@ -14,15 +14,16 @@ export default function MessageDisplay({
     const [isUserAtBottom, setIsUserAtBottom] = useState(true);
 
     const scrollToBottom = () => {
-        if(messagesEndRef && messagesEndRef.current){
+        if (messagesEndRef && messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
     const handleScroll = () => {
         const container = messagesContainerRef.current;
-        if(container){
-            const isAtBottom = container.scrollHeight - container.scrollTop === container.clientHeight;
+        if (container) {
+            const tolerance = 5;
+            const isAtBottom = Math.abs(container.scrollHeight - container.scrollTop - container.clientHeight) <= tolerance;
             setIsUserAtBottom(isAtBottom);
         }
     };
@@ -36,7 +37,7 @@ export default function MessageDisplay({
     return (
         <>
             <ul
-                className={`flex flex-col w-full h-full overflow-y-scroll text-2xl ${className}`}
+                className={`flex flex-col w-full h-full overflow-y-scroll scrollbar text-2xl ${className}`}
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
             >

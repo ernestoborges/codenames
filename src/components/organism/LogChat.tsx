@@ -47,6 +47,7 @@ export default function LogChat() {
                 <span className="text-[#ffffff99]">no time </span>
                 <div>{player.team}</div>
             </>
+            case "leave": return "saiu"
             case "enteredRoom": return "entrou na sala"
         }
     }
@@ -115,7 +116,7 @@ export default function LogChat() {
     }
 
     return (
-        <div className="border rounded-lg flex flex-col gap-4 items-center h-[36rem]">
+        <div className="border rounded-lg flex flex-col gap-4 items-center h-[36rem] pr-4 pb-4">
             <div className="w-full p-4">
                 <ul className="w-full flex gap-4 text-sm font-bold">
                     <li>
@@ -152,7 +153,7 @@ export default function LogChat() {
                     </li>
                 </ul>
             </div>
-            <MessageDisplay className="text-base px-0">
+            <MessageDisplay className="text-base">
                 {
                     log.filter(m => {
                         if (filter.all) {

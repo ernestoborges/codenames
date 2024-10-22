@@ -20,21 +20,7 @@ export class GameRoom {
         this.log.addSystemLog({ event: 'roomCreated' })
     }
 
-    // log(type: 'action' | 'player' | 'error' | 'system', message: string, details) {
-    //     this.roomLog.push({
-    //         type,
-    //         details,
-    //         message,
-    //         timestamp: new Date()
-    //     })
-    //     this.emitLog()
-    // }
-
-    // emitLog() {
-    //     this.io.to(this.id).emit('roomLog', this.roomLog)
-    // }
-
-    private logPlayerEvent(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole') {
+    private logPlayerEvent(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole' | 'leave') {
         this.log.addPlayerLog(player, event);
     }
 
@@ -71,10 +57,20 @@ export class GameRoom {
                 }
 
                 this.emitPlayers();
-                this.logPlayerEvent(foundPlayer, 'disconnected');
+                this.logPlayerEvent(foundPlayer, 'leave');
             } else {
                 roomManager.deleteRoom(this.id)
             }
+        }
+    }
+    
+    connectPlayer(id: string) {
+        const player = this.players.find(p => p.id === id);
+        if (player) {
+            player.connected = true;
+            this.emitPlayers();
+            this.logPlayerEvent(player, 'connected');
+            console.log(`${player.username} está online`);
         }
     }
 
@@ -82,6 +78,7 @@ export class GameRoom {
         const player = this.players.find(p => p.id === id);
         if (player) {
             player.connected = false;
+            player.lastActive = Date.now()
             this.emitPlayers();
             this.logPlayerEvent(player, 'disconnected');
             console.log(`${player.username} está offline`);
@@ -122,26 +119,16 @@ export class GameRoom {
         }
     }
 
-    connectPlayer(id: string) {
-        const player = this.players.find(p => p.id === id);
-        if (player) {
-            player.connected = true;
-            this.emitPlayers();
-            this.logPlayerEvent(player, 'connected');
-            console.log(`${player.username} está online`);
-        }
-    }
-
     emitPlayers() {
         this.players.forEach(me => {
-
             const response = this.players.map(p => ({
                 username: p.username,
                 role: p.role,
                 team: p.team,
                 admin: p.admin,
                 avatar: p.avatar,
-                me: me.id === p.id
+                me: me.id === p.id,
+                connected: p.connected
             }))
             if (me.socket)
                 this.io.to(me.socket).emit('roomPlayers', response)

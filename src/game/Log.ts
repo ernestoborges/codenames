@@ -14,7 +14,7 @@ export class Log {
         this.io.to(this.roomId).emit('roomLog', this.logs);
     }
 
-    addPlayerLog(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole') {
+    addPlayerLog(player: Player, event: 'connected' | 'disconnected' | 'changeTeamRole' | 'leave') {
         const logEntry: PlayerLogEvent = {
             type: 'player',
             player: {
