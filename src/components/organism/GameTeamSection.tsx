@@ -56,7 +56,7 @@ export default function GameTeamSection({
                 {
                     players.filter((player: any) => player.team === team && player.role === 'operative').map((player: any) =>
                         <li key={player.id}>
-                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
+                            <PlayerLabel name={player.username} isOnline={player.connected} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }
@@ -89,7 +89,7 @@ export default function GameTeamSection({
                 {
                     players.filter((player: any) => player.team === team && player.role === 'spymaster').map((player: any) =>
                         <li key={player.id}>
-                            <PlayerLabel name={player.username} isOnline={true} isAdmin={player.admin} avatar={player.avatar} />
+                            <PlayerLabel name={player.username} isOnline={player.connected} isAdmin={player.admin} avatar={player.avatar} />
                         </li>
                     )
                 }

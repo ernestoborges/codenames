@@ -16,6 +16,15 @@ export const handleConnection = (socket: Socket) => {
     });
 
     socket.on('disconnect', () => {
+        const { roomId, uuid } = socket.data.user
+
+        console.log('[disconnect]:',uuid,roomId)
+
+        const gameRoom = roomManager.getRoom(roomId)
+        if (gameRoom) {
+            gameRoom.disconnectPlayer(uuid)
+        }
+
         console.log('Cliente desconectado', socket.id);
     });
 };

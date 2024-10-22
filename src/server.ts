@@ -8,6 +8,7 @@ import { handleRoomEvents } from './socket-events/roomEvents';
 import { handleGameEvents } from './socket-events/gameEvents';
 import { verifyToken } from './utils/token';
 import roomManager from './game/rooms';
+import InactivityManager from './game/InactivityManager';
 
 const hostname = "localhost"
 const port = 3000
@@ -65,6 +66,12 @@ app.prepare().then(() => {
     console.log('passou no middleware')
     next()
   })
+
+  const inactivityManager = new InactivityManager(roomManager);
+
+  setInterval(() => {
+    inactivityManager.checkInactiveUsers();
+  }, 60 * 1000);
 
   server.all('*', (req: Request, res: Response) => {
     return handle(req, res);

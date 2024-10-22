@@ -5,6 +5,7 @@ export class Player {
     public team: number
     public admin: boolean
     public connected: boolean
+    public lastActive: number
 
     constructor(
         public id: string,
@@ -18,5 +19,6 @@ export class Player {
         this.admin = admin ? admin : false
         this.connected = false
         this.avatar = avatar
+        this.lastActive = Date.now()
     }
 }

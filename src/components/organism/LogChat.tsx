@@ -47,6 +47,7 @@ export default function LogChat() {
                 <span className="text-[#ffffff99]">no time </span>
                 <div>{player.team}</div>
             </>
+            case "leave": return "saiu"
             case "enteredRoom": return "entrou na sala"
         }
     }

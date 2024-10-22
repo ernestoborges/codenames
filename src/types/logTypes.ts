@@ -5,7 +5,7 @@ export type LogEvent = PlayerLogEvent | ActionLogEvent | SystemLogEvent;
 export interface PlayerLogEvent {
     type: 'player';
     player: Pick<Player, 'username' | 'role' | 'team'>;
-    event: 'connected' | 'disconnected' | 'changeTeamRole';
+    event: 'connected' | 'disconnected' | 'changeTeamRole' | 'leave';
 }
 
 export interface ActionLogEvent {
