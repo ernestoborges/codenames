@@ -1,30 +1,29 @@
-import { Socket } from 'socket.io';
-import roomManager from '../game/rooms';
+import { Socket } from 'socket.io'
+
+import roomManager from '../game/rooms'
 
 export const handleConnection = (socket: Socket) => {
+  socket.on('sync', () => {
+    const { roomId } = socket.data.user
 
+    const gameRoom = roomManager.getRoom(roomId)
+    if (gameRoom) {
+      gameRoom.emitRoomState(socket.id)
+      gameRoom.emitGameState(socket.id)
+      gameRoom.emitPlayers()
+    }
+  })
 
-    socket.on('sync', () => {
-        const { roomId } = socket.data.user
+  socket.on('disconnect', () => {
+    const { roomId, uuid } = socket.data.user
 
-        const gameRoom = roomManager.getRoom(roomId)
-        if (gameRoom) {
-            gameRoom.emitRoomState(socket.id)
-            gameRoom.emitGameState(socket.id)
-            gameRoom.emitPlayers()
-        }
-    });
+    console.log('[disconnect]:', uuid, roomId)
 
-    socket.on('disconnect', () => {
-        const { roomId, uuid } = socket.data.user
+    const gameRoom = roomManager.getRoom(roomId)
+    if (gameRoom) {
+      gameRoom.disconnectPlayer(uuid)
+    }
 
-        console.log('[disconnect]:',uuid,roomId)
-
-        const gameRoom = roomManager.getRoom(roomId)
-        if (gameRoom) {
-            gameRoom.disconnectPlayer(uuid)
-        }
-
-        console.log('Cliente desconectado', socket.id);
-    });
-};
+    console.log('Cliente desconectado', socket.id)
+  })
+}

@@ -1,143 +1,138 @@
-import { Socket, Server } from 'socket.io';
-import { verifyToken } from '../utils/token';
-import roomManager from '../game/rooms';
+import { Socket } from 'socket.io'
 
-export const handleRoomEvents = (socket: Socket, io: Server) => {
+import roomManager from '../game/rooms'
+import { verifyToken } from '../utils/token'
 
-    socket.on('joinRoom', () => {
+export const handleRoomEvents = (socket: Socket) => {
+  socket.on('joinRoom', () => {
+    const { uuid, roomId } = socket.data.user
 
-        const { uuid, roomId } = socket.data.user
+    const game = roomManager.getRoom(roomId)
+    if (!game) {
+      socket.emit('error', 'Sala não encontrada')
+      return
+    }
 
-        const game = roomManager.getRoom(roomId)
-        if (!game) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
+    const player = game.getPlayer(uuid)
+    if (!player) {
+      socket.emit('error', 'Jogador nao cadastrado')
+      return
+    }
 
-        const player = game.getPlayer(uuid);
-        if (!player) {
-            socket.emit('error', 'Jogador nao cadastrado');
-            return;
-        }
+    game.updatePlayerSocket(player.id, socket.id)
+    socket.join(roomId)
+    game.connectPlayer(player.id)
+    game.emitRoomState(player.socket)
+    game.emitGameState(player.socket)
+    console.log(`${player.username} entrou na sala ${roomId}`)
+  })
 
-        game.updatePlayerSocket(player.id, socket.id)
-        socket.join(roomId);
-        game.connectPlayer(player.id);
-        game.emitRoomState(player.socket);
-        game.emitGameState(player.socket);
-        console.log(`${player.username} entrou na sala ${roomId}`);
-    });
+  socket.on('leaveRoom', () => {
+    const { uuid, roomId } = socket.data.user
 
-    socket.on('leaveRoom', () => {
+    const game = roomManager.getRoom(roomId)
+    if (!game) {
+      socket.emit('error', 'Sala não encontrada')
+      return
+    }
 
-        const { uuid, roomId } = socket.data.user
+    const player = game.getPlayer(uuid)
+    if (!player) {
+      socket.emit('error', 'Jogador nao cadastrado')
+      return
+    }
 
-        const game = roomManager.getRoom(roomId)
-        if (!game) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
+    game.removePlayer(player.id)
+    socket.disconnect(true)
+    console.log(`${player.username} saiu da sala ${roomId}`)
+  })
 
-        const player = game.getPlayer(uuid);
-        if (!player) {
-            socket.emit('error', 'Jogador nao cadastrado');
-            return;
-        }
+  socket.on('startGame', () => {
+    try {
+      const { uuid, roomId } = socket.data.user
 
-        game.removePlayer(player.id);
-        socket.disconnect(true);
-        console.log(`${player.username} saiu da sala ${roomId}`);
-    });
+      const game = roomManager.getRoom(roomId)
+      if (!game) throw new Error('Sala não encontrada')
 
-    socket.on('startGame', () => {
-        try {
-            const { uuid, roomId } = socket.data.user;
+      const player = game.getPlayer(uuid)
+      if (!player) throw new Error('Jogador não encontrado na sala')
+      if (!player.admin) throw new Error('Jogador não é admin')
 
-            const game = roomManager.getRoom(roomId);
-            if (!game) throw new Error('Sala não encontrada');
+      game.startGame()
+    } catch (error) {
+      socket.emit('error', error.message)
+    }
+  })
 
-            const player = game.getPlayer(uuid);
-            if (!player) throw new Error('Jogador não encontrado na sala');
-            if (!player.admin) throw new Error('Jogador não é admin');
+  socket.on('restartGame', async () => {
+    const { uuid, roomId } = socket.data.user
 
-            game.startGame();
-        }
-        catch (error: any) {
-            socket.emit('error', error.message);
-        }
-    });
+    const game = roomManager.getRoom(roomId)
+    if (!game) {
+      socket.emit('error', 'Sala não encontrada')
+      return
+    }
 
-    socket.on('restartGame', async () => {
-        const { uuid, roomId } = socket.data.user;
+    const player = game.getPlayer(uuid)
+    if (!player) {
+      socket.emit('error', 'Jogador não encontrado na sala')
+      return
+    }
 
-        const game = roomManager.getRoom(roomId);
-        if (!game) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
+    if (!player.admin) {
+      socket.emit('error', 'Jogador não é admin')
+      return
+    }
 
-        const player = game.getPlayer(uuid);
-        if (!player) {
-            socket.emit('error', 'Jogador não encontrado na sala');
-            return;
-        }
+    game.restartGame()
+  })
 
-        if (!player.admin) {
-            socket.emit('error', 'Jogador não é admin');
-            return;
-        }
+  socket.on('updateTeam', async ({ team, role }) => {
+    if (team !== 0 && team !== 1 && team !== 2) {
+      socket.emit('error', `Time inválido: ${team}`)
+      return
+    }
 
-        game.restartGame();
-    })
+    if (role && role !== 'spymaster' && role !== 'operative') {
+      socket.emit('error', `Role inválida: ${role}`)
+      return
+    }
 
-    socket.on('updateTeam', async ({ team, role }) => {
+    const { uuid, roomId } = socket.data.user
 
-        if (team !== 0 && team !== 1 && team !== 2) {
-            socket.emit('error', `Time inválido: ${team}`);
-            return;
-        }
+    const game = roomManager.getRoom(roomId)
+    if (!game) {
+      socket.emit('error', 'Sala não encontrada')
+      return
+    }
 
-        if (role && role !== 'spymaster' && role !== 'operative') {
-            socket.emit('error', `Role inválida: ${role}`);
-            return;
-        }
+    const player = game.getPlayer(uuid)
+    if (!player) {
+      socket.emit('error', 'Jogador não encontrado')
+      return
+    }
 
-        const { uuid, roomId } = socket.data.user
+    game.updatePlayerTeamAndRole(player.id, team, role)
+  })
 
-        const game = roomManager.getRoom(roomId)
-        if (!game) {
-            socket.emit('error', 'Sala não encontrada');
-            return;
-        }
+  socket.on('gameResetTeams', ({ token }) => {
+    try {
+      const decodedToken = verifyToken(token)
+      if (!decodedToken) throw new Error('Token inválido')
 
-        const player = game.getPlayer(uuid)
-        if (!player) {
-            socket.emit('error', 'Jogador não encontrado');
-            return;
-        }
+      const { uuid, roomId } = decodedToken
 
-        game.updatePlayerTeamAndRole(player.id, team, role);
-    });
+      const game = roomManager.getRoom(roomId)
 
-    socket.on('gameResetTeams', ({ token }) => {
-        try {
-            const decodedToken = verifyToken(token);
-            if (!decodedToken) throw new Error('Token inválido');
+      if (!game) throw new Error('Sala não encontrada')
 
-            const { uuid, roomId } = decodedToken;
+      const player = game.getPlayer(uuid)
+      if (!player) throw new Error('Jogador não encontrado na sala')
+      if (!player.admin) throw new Error('Jogador não é admin')
 
-            const game = roomManager.getRoom(roomId);
-
-            if (!game) throw new Error('Sala não encontrada');
-
-            const player = game.getPlayer(uuid);
-            if (!player) throw new Error('Jogador não encontrado na sala');
-            if (!player.admin) throw new Error('Jogador não é admin');
-
-            game.resetTeams();
-        }
-        catch (error: any) {
-            socket.emit('error', error.message);
-        }
-    });
-};
+      game.resetTeams()
+    } catch (error) {
+      socket.emit('error', error.message)
+    }
+  })
+}
