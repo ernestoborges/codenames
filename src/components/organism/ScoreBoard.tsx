@@ -1,67 +1,65 @@
-import React from "react"
-import { IoInfiniteOutline } from "react-icons/io5";
+import React from 'react'
+import { IoInfiniteOutline } from 'react-icons/io5'
 
-export default function ScoreBoard({
-    gameState
-}: {
-    gameState: any
-}) {
+import { GameState } from '../../types/codenames'
 
-    if (gameState.winner) {
-        return (
-            <Container>
-                <Wrapper team={gameState.winner}>
-                    {`Time ${gameState.winner} venceu`}
-                </Wrapper>
-            </Container>
-        )
-    }
-
+export default function ScoreBoard({ gameState }: { gameState: GameState }) {
+  if (gameState.winner) {
     return (
-        <Container>
-            {
-                gameState.phase === 1
-                    ? <Wrapper team={gameState.turn} className="flex-grow flex justify-center">
-                        Spymaster escolhendo palavra-chave...
-                    </Wrapper>
-                    : <>
-                        <Wrapper team={gameState.turn}>
-                            {gameState.clue.word}
-                        </Wrapper>
-                        <Wrapper team={gameState.turn}>
-                            {gameState.clue.number < 0
-                                ? <IoInfiniteOutline />
-                                : gameState.clue.number}
-                        </Wrapper>
-                    </>
-            }
-        </Container>
+      <Container>
+        <Wrapper team={gameState.winner}>
+          {`Time ${gameState.winner} venceu`}
+        </Wrapper>
+      </Container>
     )
+  }
+
+  return (
+    <Container>
+      {gameState.phase === 1 ? (
+        <Wrapper
+          team={gameState.turn}
+          className='flex flex-grow justify-center'
+        >
+          Spymaster escolhendo palavra-chave...
+        </Wrapper>
+      ) : (
+        <>
+          <Wrapper team={gameState.turn}>{gameState.clue.word}</Wrapper>
+          <Wrapper team={gameState.turn}>
+            {gameState.clue.number < 0 ? (
+              <IoInfiniteOutline />
+            ) : (
+              gameState.clue.number
+            )}
+          </Wrapper>
+        </>
+      )}
+    </Container>
+  )
 }
 
 function Container({ children }: { children: React.ReactNode }) {
-    return (
-        <div className="w-full flex justify-center gap-4">
-            {children}
-        </div>
-    )
+  return <div className='flex w-full justify-center gap-4'>{children}</div>
 }
 
 function Wrapper({
-    children, team, className
+  children,
+  team,
+  className
 }: {
-    children: React.ReactNode,
-    team: number,
-    className?: string
+  children: React.ReactNode
+  team: number
+  className?: string
 }) {
-    return (
-        <div
-            className={`border-2 py-2 px-4 flex items-center ${className}`}
-            style={{
-                backgroundColor: team === 1 ? '#143464' : '#b4202a'
-            }}
-        >
-            {children}
-        </div>
-    )
+  return (
+    <div
+      className={`flex items-center border-2 px-4 py-2 ${className}`}
+      style={{
+        backgroundColor: team === 1 ? '#143464' : '#b4202a'
+      }}
+    >
+      {children}
+    </div>
+  )
 }

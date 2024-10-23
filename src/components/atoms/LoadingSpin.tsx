@@ -1,10 +1,5 @@
-import { LuLoader } from "react-icons/lu";
-export default function LoadingSpin(){
+import { LuLoader } from 'react-icons/lu'
 
-    return (
-        <>
-            <LuLoader className="animate-spin" />
-        </>
-    )
-
+export default function LoadingSpin() {
+  return <LuLoader className='animate-spin' />
 }

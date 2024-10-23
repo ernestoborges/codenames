@@ -1,9 +1,8 @@
 export default function PlaceholderLabel() {
-
-    return <>
-        <div className="flex gap-4 items-center p-4 bg-red">
-            <div className="rounded-full w-4 h-4" />
-            <span>Vazio</span>
-        </div>
-    </>
+  return (
+    <div className='flex items-center gap-4 bg-red p-4'>
+      <div className='h-4 w-4 rounded-full' />
+      <span>Vazio</span>
+    </div>
+  )
 }

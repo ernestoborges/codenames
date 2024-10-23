@@ -1,18 +1,19 @@
 'use client'
-import { useEffect, useState } from 'react';
-import GameRoom from '../../../../components/templates/GameRoom';
-import { useTokenContext } from '../../../../context/token';
-import { SocketProvider } from '../../../../context/socket';
-import { useRouter } from 'next/navigation';
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+
+import GameRoom from '../../../../components/templates/GameRoom'
+import { SocketProvider } from '../../../../context/socket'
+import { useTokenContext } from '../../../../context/token'
 
 export default function Room() {
-
-  const { token } = useTokenContext();
+  const { token } = useTokenContext()
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    console.log('Token atualizado:', token);
+    console.log('Token atualizado:', token)
     if (isLoading) {
       setIsLoading(false)
     }

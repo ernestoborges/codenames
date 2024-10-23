@@ -1,110 +1,125 @@
-import { HiOutlineArrowUturnUp } from "react-icons/hi2";
-import { FaUserSecret } from "react-icons/fa6";
-import { useState } from "react";
-import { MdOutlineStar } from "react-icons/md";
-import { useSocketContext } from "../../context/socket";
-import { useTokenContext } from "../../context/token";
+import { useState } from 'react'
+import { FaUserSecret } from 'react-icons/fa6'
+import { HiOutlineArrowUturnUp } from 'react-icons/hi2'
+import { MdOutlineStar } from 'react-icons/md'
+
+import { useSocketContext } from '../../context/socket'
+import { useTokenContext } from '../../context/token'
+import { Card } from '../../types/codenames'
 
 export default function GameCard({
-    card,
-    operativeTurn
+  card,
+  operativeTurn
 }: {
-    card: any,
-    operativeTurn: boolean
+  card: Card
+  operativeTurn: boolean
 }) {
+  const { socket } = useSocketContext()
+  const { token } = useTokenContext()
+  const [hover, setHover] = useState<boolean>(false)
+  const [reveal, setReveal] = useState<boolean>(false)
+  let color
+  switch (card.color) {
+    case 0:
+      color = '#505050'
+      break
+    case 1:
+      color = '#143464'
+      break
+    case 2:
+      color = '#b4202a'
+      break
+    case 3:
+      color = 'black'
+      break
+  }
 
-    const { socket } = useSocketContext();
-    const { token } = useTokenContext();
-    const [hover, setHover] = useState<boolean>(false);
-    const [reveal, setReveal] = useState<boolean>(false);
-    let color;
-    switch (card.color) {
-        case 0: color = '#505050'; break;
-        case 1: color = '#143464'; break;
-        case 2: color = '#b4202a'; break;
-        case 3: color = 'black'; break;
-    }
-
-    if (card.hidden) {
-        return <>
+  if (card.hidden) {
+    return (
+      <div
+        className={`w-aut flex h-[90px] w-[154px] flex-col items-center justify-center border-4 border-white text-2xl`}
+        style={{
+          backgroundColor: card.color !== undefined ? color : '#9c8061'
+        }}
+        onClick={() => {
+          if (socket)
+            socket.emit('gameTip', { token, cardIndex: card.position })
+        }}
+      >
+        <div className='flex w-full flex-grow items-start justify-between'>
+          <ul className='scrollbar flex w-full flex-grow flex-wrap items-start justify-start overflow-y-auto p-1 text-sm'>
+            {card.tips.map((name: string, i: number) => (
+              <li key={i} className='rounded-md border px-1'>
+                {name}
+              </li>
+            ))}
+          </ul>
+          {operativeTurn ? (
             <div
-                className={`w-[154px] h-[90px] flex flex-col items-center justify-center w-aut border-4 border-white text-2xl`}
-                style={{ backgroundColor: card.color !== undefined ? color : '#9c8061' }}
-                onClick={() => { socket && socket.emit('gameTip', { token, cardIndex: card.position }) }}
+              className='flex cursor-pointer items-center justify-center border-b border-l border-green-500 bg-green-500 p-1 text-3xl'
+              onMouseEnter={() => setHover(true)}
+              onMouseLeave={() => setHover(false)}
+              onClick={() =>
+                socket &&
+                socket.emit('gameFlipCard', {
+                  token,
+                  cardPosition: card.position
+                })
+              }
             >
-                <div className="flex items-start justify-between flex-grow w-full">
-                    <ul className="flex-grow p-1 w-full flex flex-wrap items-start justify-start text-sm overflow-y-auto scrollbar">
-                        {
-                            card.tips.map((name: string, i: number) =>
-                                <li key={i} className="border px-1 rounded-md">
-                                    {name}
-                                </li>)
-                        }
-                    </ul>
-                    {
-                        operativeTurn
-                            ? <div
-                                className="flex items-center justify-center bg-green-500 border-green-500 border-l border-b p-1 text-3xl cursor-pointer "
-                                onMouseEnter={() => setHover(true)}
-                                onMouseLeave={() => setHover(false)}
-                                onClick={() => socket && socket.emit('gameFlipCard', { token, cardPosition: card.position })}
-                            >
-                                {
-                                    hover
-                                        ? <HiOutlineArrowUturnUp />
-                                        : <FaUserSecret />
-                                }
-                            </div>
-                            : <div className="flex items-center justify-center border-l border-b p-1 text-3xl">
-                                <FaUserSecret />
-                            </div>
-                    }
-                </div>
-                <div className="bold text-lg border-t-2 w-full flex items-center">
-                    <div className="py-2 uppercase flex justify-center w-full">
-                        {card.word}
-                    </div>
-                </div>
-            </div >
-        </>
-    }
-
-    return <>
-        <div
-            className={`w-[154px] h-[90px] flex items-end border-4 border-white text-2xl relative overflow-hidden cursor-pointer`}
-            style={{ backgroundColor: color ? color : '#1f1f1f1f' }}
-            onClick={() => setReveal(!reveal)}
-        >
-            <div
-                className="w-full h-full flex items-center justify-center text-base border-b-2  absolute transition-[top] ease-in-out duration-700"
-                style={{
-                    backgroundColor: color ? color : '#1f1f1f1f',
-                    top: reveal ? '-3rem' : '0.2rem'
-                }}
-            >
-                <div className="relative w-full h-full flex items-center justify-center -rotate-12">
-                    <div className="absolute border-2 w-[7rem] h-[7rem] rounded-full flex items-center justify-center">
-                        <MdOutlineStar className="absolute top-0 font-bold" />
-                        <MdOutlineStar className="absolute top-2 left-5 text-sm" />
-                        <MdOutlineStar className="absolute top-2 right-5 text-sm" />
-                        <MdOutlineStar className="absolute bottom-0 font-bold" />
-                        <MdOutlineStar className="absolute bottom-2 left-5 text-sm" />
-                        <MdOutlineStar className="absolute bottom-2 right-5 text-sm" />
-                        <div className="border-2 w-[4.6rem] h-[4.6rem] rounded-full"></div>
-                    </div>
-                    <div
-                        className="absolute flex gap-2 justify-center items-center uppercase border-2 rounded-md py-2 px-4"
-                        style={{ backgroundColor: color ? color : '#1f1f1f1f' }}
-                    >
-                        <span className="font-bold">caso encerrado</span>
-                    </div>
-                </div>
+              {hover ? <HiOutlineArrowUturnUp /> : <FaUserSecret />}
             </div>
-            <div className="bold text-lg w-full flex items-center">
-                <div className="py-2 uppercase flex justify-center w-full">
-                    {card.word}
-                </div>
+          ) : (
+            <div className='flex items-center justify-center border-b border-l p-1 text-3xl'>
+              <FaUserSecret />
             </div>
+          )}
         </div>
-    </>
+        <div className='bold flex w-full items-center border-t-2 text-lg'>
+          <div className='flex w-full justify-center py-2 uppercase'>
+            {card.word}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      className={`relative flex h-[90px] w-[154px] cursor-pointer items-end overflow-hidden border-4 border-white text-2xl`}
+      style={{ backgroundColor: color ? color : '#1f1f1f1f' }}
+      onClick={() => setReveal(!reveal)}
+    >
+      <div
+        className='absolute flex h-full w-full items-center justify-center border-b-2 text-base transition-[top] duration-700 ease-in-out'
+        style={{
+          backgroundColor: color ? color : '#1f1f1f1f',
+          top: reveal ? '-3rem' : '0.2rem'
+        }}
+      >
+        <div className='relative flex h-full w-full -rotate-12 items-center justify-center'>
+          <div className='absolute flex h-[7rem] w-[7rem] items-center justify-center rounded-full border-2'>
+            <MdOutlineStar className='absolute top-0 font-bold' />
+            <MdOutlineStar className='absolute left-5 top-2 text-sm' />
+            <MdOutlineStar className='absolute right-5 top-2 text-sm' />
+            <MdOutlineStar className='absolute bottom-0 font-bold' />
+            <MdOutlineStar className='absolute bottom-2 left-5 text-sm' />
+            <MdOutlineStar className='absolute bottom-2 right-5 text-sm' />
+            <div className='h-[4.6rem] w-[4.6rem] rounded-full border-2'></div>
+          </div>
+          <div
+            className='absolute flex items-center justify-center gap-2 rounded-md border-2 px-4 py-2 uppercase'
+            style={{ backgroundColor: color ? color : '#1f1f1f1f' }}
+          >
+            <span className='font-bold'>caso encerrado</span>
+          </div>
+        </div>
+      </div>
+      <div className='bold flex w-full items-center text-lg'>
+        <div className='flex w-full justify-center py-2 uppercase'>
+          {card.word}
+        </div>
+      </div>
+    </div>
+  )
 }
