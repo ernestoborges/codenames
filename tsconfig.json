@@ -5,46 +5,41 @@
     "esm": true
   },
   "compilerOptions": {
-    "outDir": "./dist", // Diretório de saída para os arquivos compilados
-    // "rootDir": "./src", // Diretório raiz onde os arquivos TypeScript estão
-    "module": "esnext", // Use 'esnext' para que funcione bem com ESModules
+    "baseUrl": "src",
     "target": "es2017", // Defina o alvo do JavaScript para o ES2017 ou mais recente
+    "outDir": "./dist", // Diretório de saída para os arquivos compilados
     "lib": [
       "dom",
-      "es2017"
+      "dom.iterable",
+      "esnext"
     ], // Libs do JS que você quer suportar
+    "allowJs": true,
+    "skipLibCheck": true, // Ignora checagem de bibliotecas para reduzir tempo de build
     "esModuleInterop": true, // Para interoperar com módulos CommonJS
+    "allowSyntheticDefaultImports": true,
+    "strict": true, // Habilita todas as verificações de tipo estritas
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "module": "esnext", // Use 'esnext' para que funcione bem com ESModules
     "moduleResolution": "node", // Resolução de módulo estilo Node.js
     "resolveJsonModule": true, // Permite importar arquivos JSON
-    "skipLibCheck": true, // Ignora checagem de bibliotecas para reduzir tempo de build
-    "strict": true, // Habilita todas as verificações de tipo estritas
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    // "rootDir": "./src", // Diretório raiz onde os arquivos TypeScript estão
     "noImplicitAny": false,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    },
-    "allowJs": true,
-    // "noEmit": true,
-    "incremental": true,
-    "isolatedModules": true,
-    "jsx": "preserve",
-    "noEmit": false
+    // "incremental": true,
   },
   "include": [
     "next-env.d.ts",
     "src/**/*.tsx",
     "src/**/*.ts",
     ".next/types/**/*.ts"
-    // ".next/types/**/*.ts"
-    // ".next/types/**/*.ts"
-    // "next.config.mts",
-    // "next.config.mts"
   ],
   "exclude": [
     "node_modules",
