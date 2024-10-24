@@ -2,16 +2,18 @@ import Image from 'next/image'
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io'
 
 import { MAX_AVATARS } from '../../conf/codenames.conf'
-import Button from '../atoms/Button'
-import LoadingSpin from '../atoms/LoadingSpin'
+import Button from '../atoms/button'
+import LoadingSpin from '../atoms/loading-spin'
+
+interface AvatarSelectorProps {
+  index: number
+  setIndex: (n: number) => void
+}
 
 export default function AvatarSelector({
   index,
   setIndex
-}: {
-  index: number
-  setIndex: (n: number) => void
-}) {
+}: AvatarSelectorProps) {
   const handlePreviousAvatar = () => {
     if (index - 1 < 1) {
       setIndex(MAX_AVATARS)

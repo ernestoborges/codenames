@@ -1,3 +1,12 @@
+interface ButtonProps {
+  children: React.ReactNode
+  onClick?: () => void
+  className?: string
+  disabled?: boolean
+  type?: 'button' | 'submit' | 'reset'
+  name?: string
+}
+
 export default function Button({
   children,
   onClick,
@@ -5,14 +14,7 @@ export default function Button({
   disabled,
   name,
   type = 'button'
-}: {
-  children: React.ReactNode
-  onClick?: () => void
-  className?: string
-  disabled?: boolean
-  type?: 'button' | 'submit' | 'reset'
-  name?: string
-}) {
+}: ButtonProps) {
   if (disabled) {
     return (
       <button

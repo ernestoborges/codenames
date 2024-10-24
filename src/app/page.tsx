@@ -1,4 +1,4 @@
-import Lobby from '../components/templates/Lobby'
+import Lobby from '../components/templates/lobby'
 import { TokenProvider } from '../context/token'
 
 export default function Home() {

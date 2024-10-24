@@ -3,9 +3,9 @@ import { IoMdSend } from 'react-icons/io'
 
 import { useSocketContext } from '../../context/socket'
 import { useTokenContext } from '../../context/token'
-import MessageDisplay from '../molecules/MessageDisplay'
+import MessageDisplay from '../molecules/message-display'
 
-interface Message {
+type Message = {
   sender: string
   me: boolean
   message: string

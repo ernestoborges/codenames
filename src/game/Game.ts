@@ -24,7 +24,6 @@ export class Game {
   }
   winner: number
 
-  // constructor(room: GameRoom) {
   constructor(log: Log) {
     this.turn = 1
     this.phase = 1

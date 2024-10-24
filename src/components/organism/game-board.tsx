@@ -1,13 +1,12 @@
 import { Card } from '../../types/codenames'
-import GameCard from '../molecules/GameCard'
+import GameCard from '../molecules/game-card'
 
-export default function GameBoard({
-  cards,
-  operativeTurn
-}: {
+type GameBoardProps = {
   cards: Card[]
   operativeTurn: boolean
-}) {
+}
+
+export default function GameBoard({ cards, operativeTurn }: GameBoardProps) {
   return (
     <div className='flex'>
       <div className='grid grid-flow-col grid-rows-5 gap-x-2 gap-y-2'>

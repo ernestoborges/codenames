@@ -3,7 +3,21 @@ import { IoInfiniteOutline } from 'react-icons/io5'
 
 import { GameState } from '../../types/codenames'
 
-export default function ScoreBoard({ gameState }: { gameState: GameState }) {
+type ScoreBoardProps = {
+  gameState: GameState
+}
+
+type ContainerProps = {
+  children: React.ReactNode
+}
+
+type WrapperProps = {
+  children: React.ReactNode
+  team: number
+  className?: string
+}
+
+export default function ScoreBoard({ gameState }: ScoreBoardProps) {
   if (gameState.winner) {
     return (
       <Container>
@@ -39,19 +53,11 @@ export default function ScoreBoard({ gameState }: { gameState: GameState }) {
   )
 }
 
-function Container({ children }: { children: React.ReactNode }) {
+function Container({ children }: ContainerProps) {
   return <div className='flex w-full justify-center gap-4'>{children}</div>
 }
 
-function Wrapper({
-  children,
-  team,
-  className
-}: {
-  children: React.ReactNode
-  team: number
-  className?: string
-}) {
+function Wrapper({ children, team, className }: WrapperProps) {
   return (
     <div
       className={`flex items-center border-2 px-4 py-2 ${className}`}

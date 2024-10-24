@@ -7,13 +7,12 @@ import { useSocketContext } from '../../context/socket'
 import { useTokenContext } from '../../context/token'
 import { Card } from '../../types/codenames'
 
-export default function GameCard({
-  card,
-  operativeTurn
-}: {
+type GameCardProps = {
   card: Card
   operativeTurn: boolean
-}) {
+}
+
+export default function GameCard({ card, operativeTurn }: GameCardProps) {
   const { socket } = useSocketContext()
   const { token } = useTokenContext()
   const [hover, setHover] = useState<boolean>(false)

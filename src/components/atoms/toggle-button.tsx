@@ -1,16 +1,18 @@
 import React from 'react'
 
+interface ToggleButton {
+  children: React.ReactNode
+  value: boolean
+  className?: string
+  onClick: () => void
+}
+
 export default function ToggleButton({
   children,
   value,
   className,
   onClick
-}: {
-  children: React.ReactNode
-  value: boolean
-  className?: string
-  onClick: () => void
-}) {
+}: ToggleButton) {
   const color1 = '#23823a'
   const color2 = '#75e9a0'
 

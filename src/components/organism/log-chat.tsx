@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react'
 import { useSocketContext } from '../../context/socket'
 import { useTokenContext } from '../../context/token'
 import { ActionLogEvent, LogEvent } from '../../types/codenames'
-import ToggleButton from '../atoms/ToggleButton'
-import MessageDisplay from '../molecules/MessageDisplay'
+import ToggleButton from '../atoms/toggle-button'
+import MessageDisplay from '../molecules/message-display'
 
 export default function LogChat() {
   const { socket, connected } = useSocketContext()

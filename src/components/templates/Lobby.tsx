@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation'
 import { TbRefresh } from 'react-icons/tb'
 
 import { useTokenContext } from '../../context/token'
-import Button from '../atoms/Button'
-import LoadingSpin from '../atoms/LoadingSpin'
-import { TextInput } from '../atoms/TextInput'
-import AvatarSelector from '../molecules/AvatarSelector'
+import Button from '../atoms/button'
+import { Input } from '../atoms/input'
+import LoadingSpin from '../atoms/loading-spin'
+import AvatarSelector from '../molecules/avatar-selector'
 
 export default function Lobby() {
   const router = useRouter()
@@ -153,7 +153,7 @@ export default function Lobby() {
             <AvatarSelector index={avatar} setIndex={setAvatar} />
             <label className='flex flex-col gap-2'>
               Nome do Jogador
-              <TextInput value={username} onchange={handleChangeUsername} />
+              <Input value={username} onchange={handleChangeUsername} />
             </label>
             <hr className='h-0 w-full border-t border-gray-300' />
             <Button
@@ -171,7 +171,7 @@ export default function Lobby() {
             </div>
             <label className='flex flex-col gap-2'>
               Nome da Sala
-              <TextInput value={roomName} onchange={handleChangeRoomName} />
+              <Input value={roomName} onchange={handleChangeRoomName} />
             </label>
             <Button
               type='submit'

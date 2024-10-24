@@ -1,10 +1,9 @@
-export default function Select({
-  options,
-  defaultvalue
-}: {
+type SelecProps = {
   options: string[]
   defaultvalue?: string
-}) {
+}
+
+export default function Select({ options, defaultvalue }: SelecProps) {
   return (
     <select className='text-black'>
       {options.map((option, i) => (

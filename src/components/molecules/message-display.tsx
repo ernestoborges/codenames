@@ -1,12 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react'
 
+type MessageDisplayProps = {
+  children: React.ReactNode
+  className?: string
+}
+
 export default function MessageDisplay({
   children,
   className
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+}: MessageDisplayProps) {
   const messagesEndRef = useRef<HTMLDivElement | null>(null)
   const messagesContainerRef = useRef<HTMLUListElement | null>(null)
 

@@ -3,23 +3,27 @@ import { RxEnter } from 'react-icons/rx'
 import { useSocketContext } from '../../context/socket'
 import { useTokenContext } from '../../context/token'
 import { Player } from '../../types/codenames'
-import Button from '../atoms/Button'
-import PlayerLabel from '../molecules/PlayerLabel'
+import Button from '../atoms/button'
+import PlayerLabel from '../molecules/player-label'
+
+type RoomState = {
+  name: string
+  status: string
+}
+
+type GameTeamSectionProps = {
+  players: Player[]
+  team: number
+  score: number
+  roomState: RoomState
+}
 
 export default function GameTeamSection({
   players,
   team,
   score,
   roomState
-}: {
-  players: Player[]
-  team: number
-  score: number
-  roomState: {
-    name: string
-    status: string
-  }
-}) {
+}: GameTeamSectionProps) {
   const { socket } = useSocketContext()
   const { token } = useTokenContext()
 

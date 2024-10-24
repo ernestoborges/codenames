@@ -3,9 +3,13 @@ import { useState } from 'react'
 import { useSocketContext } from '../../context/socket'
 import { useTokenContext } from '../../context/token'
 import { GameState } from '../../types/codenames'
-import Button from '../atoms/Button'
+import Button from '../atoms/button'
 
-export default function ClueInput({ gameState }: { gameState: GameState }) {
+type ClueInputProps = {
+  gameState: GameState
+}
+
+export default function ClueInput({ gameState }: ClueInputProps) {
   const { socket } = useSocketContext()
   const { token } = useTokenContext()
 

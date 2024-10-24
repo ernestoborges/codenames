@@ -1,19 +1,26 @@
 import Image from 'next/image'
 import { FaCrown, FaRegUser } from 'react-icons/fa'
 
+type PlayerLabelProps = {
+  name?: string
+  isOnline?: boolean
+  isAdmin?: boolean
+  avatar?: number
+  isPlaceholder?: boolean
+}
+
+type LabelContainerProps = {
+  children: React.ReactNode
+  className?: string
+}
+
 export default function PlayerLabel({
   name,
   isOnline,
   isAdmin,
   avatar,
   isPlaceholder
-}: {
-  name?: string
-  isOnline?: boolean
-  isAdmin?: boolean
-  avatar?: number
-  isPlaceholder?: boolean
-}) {
+}: PlayerLabelProps) {
   if (isPlaceholder) {
     return (
       <LabelContainer className='bg-black opacity-30'>
@@ -39,13 +46,7 @@ export default function PlayerLabel({
   )
 }
 
-function LabelContainer({
-  children,
-  className
-}: {
-  children: React.ReactNode
-  className?: string
-}) {
+function LabelContainer({ children, className }: LabelContainerProps) {
   return (
     <div
       className={`bg-gray-500 flex items-center gap-4 border-b border-t ${className}`}

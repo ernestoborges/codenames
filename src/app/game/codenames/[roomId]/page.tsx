@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-import GameRoom from '../../../../components/templates/GameRoom'
+import GameRoom from '../../../../components/templates/game-room'
 import { SocketProvider } from '../../../../context/socket'
 import { useTokenContext } from '../../../../context/token'
 
