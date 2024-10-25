@@ -1,14 +1,11 @@
 'use client'
-import { TokenProvider } from "../../../context/token";
+
+import { TokenProvider } from '../../../context/token'
 
 export default function CodenamesLayout({
-  children,
+  children
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
-  return (
-    <TokenProvider>
-      {children}
-    </TokenProvider>
-  );
+  return <TokenProvider>{children}</TokenProvider>
 }
