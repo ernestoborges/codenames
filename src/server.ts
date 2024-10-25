@@ -82,7 +82,7 @@ app.prepare().then(() => {
 
     handleConnection(socket)
     handleRoomEvents(socket)
-    handleChatEvents(socket, io)
+    handleChatEvents(socket)
     handleGameEvents(socket)
   })
 

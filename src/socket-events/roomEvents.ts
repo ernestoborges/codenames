@@ -58,7 +58,9 @@ export const handleRoomEvents = (socket: Socket) => {
 
       game.startGame()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 
@@ -130,7 +132,9 @@ export const handleRoomEvents = (socket: Socket) => {
 
       game.resetTeams()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 
@@ -146,7 +150,9 @@ export const handleRoomEvents = (socket: Socket) => {
         room.log.emitLog(player.socket)
       }
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 }
