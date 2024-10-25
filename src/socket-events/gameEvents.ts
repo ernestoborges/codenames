@@ -32,7 +32,9 @@ export const handleGameEvents = (socket: Socket) => {
       game.gameState.flipCard(player, cardPosition)
       game.emitGameState()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 
@@ -73,7 +75,9 @@ export const handleGameEvents = (socket: Socket) => {
       })
       game.emitGameState()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 
@@ -107,7 +111,9 @@ export const handleGameEvents = (socket: Socket) => {
 
       game.emitGameState()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 
@@ -140,7 +146,9 @@ export const handleGameEvents = (socket: Socket) => {
       })
       game.emitGameState()
     } catch (error) {
-      socket.emit('error', error.message)
+      if (error instanceof Error) {
+        socket.emit('error', error.message)
+      }
     }
   })
 }

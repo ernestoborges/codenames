@@ -1,8 +1,8 @@
-import { Server, Socket } from 'socket.io'
+import { Socket } from 'socket.io'
 
 import roomManager from '../game/rooms'
 
-export const handleChatEvents = (socket: Socket, io: Server) => {
+export const handleChatEvents = (socket: Socket) => {
   socket.on('sendMessage', async ({ message }: { message: string }) => {
     if (!message) {
       socket.emit('error', 'Mensagem não enviada')

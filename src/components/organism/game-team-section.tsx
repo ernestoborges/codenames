@@ -44,7 +44,7 @@ export default function GameTeamSection({
         <div className='flex w-full items-center justify-between bg-white text-black'>
           <p className='py-2'>Operative</p>
           {(roomState.status == 'waiting' || (me && me.role) === 'spectator') &&
-            (me.team !== team || (me && me.role) !== 'operative') && (
+            ((me && me.team !== team) || (me && me.role) !== 'operative') && (
               <>
                 <Button
                   className='flex items-center p-2'
@@ -107,7 +107,7 @@ export default function GameTeamSection({
         <div className='flex w-full items-center justify-between bg-white text-black'>
           <p className='py-2'>Spymaster</p>
           {(roomState.status == 'waiting' || (me && me.role) === 'spectator') &&
-            (me.team !== team || (me && me.role) !== 'spymaster') && (
+            ((me && me.team !== team) || (me && me.role) !== 'spymaster') && (
               <Button
                 className='flex items-center p-2'
                 onClick={() => {
