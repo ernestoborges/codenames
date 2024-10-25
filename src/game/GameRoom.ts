@@ -11,7 +11,7 @@ export class GameRoom {
   public gameState: Game
   public status: 'waiting' | 'playing'
   public log: Log
-  private chat: Chat
+  public chat: Chat
 
   constructor(
     public id: string,
@@ -19,7 +19,7 @@ export class GameRoom {
     public io: Server
   ) {
     this.status = 'waiting'
-    this.chat = new Chat()
+    this.chat = new Chat(this.id, this.io)
     this.log = new Log(this.id, this.io)
     this.gameState = new Game(this.log)
     this.log.addSystemLog({ event: 'roomCreated' })
@@ -48,10 +48,9 @@ export class GameRoom {
 
   addPlayer(player: Player) {
     this.players.push(player)
-    this.emitGameState(player.socket)
-    this.emitRoomState(player.socket)
     this.emitPlayers()
     this.logPlayerEvent(player, 'connected')
+
     if (player.username) {
       console.log(`${player.username} adicionado na sala ${this.name}`)
     } else {
@@ -83,6 +82,9 @@ export class GameRoom {
       player.connected = true
       this.emitPlayers()
       this.logPlayerEvent(player, 'connected')
+      this.emitGameState(player.socket)
+      this.emitRoomState(player.socket)
+      this.chat.emitChat(player.socket)
       console.log(`${player.username} está online`)
     }
   }

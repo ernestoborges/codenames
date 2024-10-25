@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 
 import { useSocketContext } from '../../context/socket'
-import { useTokenContext } from '../../context/token'
 import { ActionLogEvent, LogEvent } from '../../types/codenames'
 import ToggleButton from '../atoms/toggle-button'
 import MessageDisplay from '../molecules/message-display'
 
 export default function LogChat() {
   const { socket, connected } = useSocketContext()
-  const { token } = useTokenContext()
   const [log, setLog] = useState<LogEvent[]>([])
   const [filter, setFilter] = useState({
     all: true,
@@ -19,12 +17,14 @@ export default function LogChat() {
   })
 
   useEffect(() => {
-    if (socket) {
+    if (socket && connected) {
       socket.on('roomLog', (log) => {
         setLog(log)
       })
+
+      socket.emit('roomLogGet')
     }
-  }, [socket, connected, token])
+  }, [socket, connected])
 
   const handleSystemLog = (event: string) => {
     switch (event) {

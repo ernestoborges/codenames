@@ -20,7 +20,21 @@ export const handleChatEvents = (socket: Socket, io: Server) => {
     const player = room.getPlayer(uuid)
     if (player) {
       room.addChatMessage(player, message)
-      io.to(roomId).emit('chatUpdate', room.getChatMessages())
+    }
+  })
+
+  socket.on('chatGet', async () => {
+    const { roomId, uuid } = socket.data.user
+
+    const room = roomManager.getRoom(roomId)
+    if (!room) {
+      socket.emit('error', 'Sala não encontrada')
+      return
+    }
+
+    const player = room.getPlayer(uuid)
+    if (player) {
+      room.chat.emitChat(player.socket)
     }
   })
 }

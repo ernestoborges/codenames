@@ -27,10 +27,16 @@ export default function Chat() {
   }
 
   useEffect(() => {
-    if (socket) {
+    if (socket && connected) {
       socket.on('chatUpdate', (newChat: Message[]) => {
         setChat(newChat)
       })
+
+      socket.emit('chatGet')
+
+      return () => {
+        socket.off('chatUpdate')
+      }
     }
   }, [socket, connected])
 

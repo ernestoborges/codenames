@@ -19,8 +19,12 @@ export class Log {
     this.roomId = id
   }
 
-  emitLog() {
-    this.io.to(this.roomId).emit('roomLog', this.logs)
+  emitLog(playerSocket?: string) {
+    if (playerSocket) {
+      this.io.to(playerSocket).emit('roomLog', this.logs)
+    } else {
+      this.io.to(this.roomId).emit('roomLog', this.logs)
+    }
   }
 
   addPlayerLog(

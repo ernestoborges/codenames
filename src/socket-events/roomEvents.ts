@@ -22,8 +22,6 @@ export const handleRoomEvents = (socket: Socket) => {
     game.updatePlayerSocket(player.id, socket.id)
     socket.join(roomId)
     game.connectPlayer(player.id)
-    game.emitRoomState(player.socket)
-    game.emitGameState(player.socket)
     console.log(`${player.username} entrou na sala ${roomId}`)
   })
 
@@ -131,6 +129,22 @@ export const handleRoomEvents = (socket: Socket) => {
       if (!player.admin) throw new Error('Jogador não é admin')
 
       game.resetTeams()
+    } catch (error) {
+      socket.emit('error', error.message)
+    }
+  })
+
+  socket.on('roomLogGet', () => {
+    try {
+      const { roomId, uuid } = socket.data.user
+
+      const room = roomManager.getRoom(roomId)
+      if (!room) throw new Error('Sala não encontrada')
+
+      const player = room.getPlayer(uuid)
+      if (player) {
+        room.log.emitLog(player.socket)
+      }
     } catch (error) {
       socket.emit('error', error.message)
     }

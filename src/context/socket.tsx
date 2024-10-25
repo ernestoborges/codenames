@@ -38,12 +38,10 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
 
       newSocket.on('connect', () => {
         setConnected(true)
-        console.log('Conectado ao servidor Socket.io')
       })
 
       newSocket.on('disconnect', () => {
         setConnected(false)
-        console.log('Desconectado do servidor Socket.io')
         router.push('/')
       })
 
