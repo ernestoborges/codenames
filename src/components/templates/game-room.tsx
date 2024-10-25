@@ -7,6 +7,7 @@ import { useTokenContext } from '../../context/token'
 import { GameState, Player, RoomState } from '../../types/codenames'
 import Button from '../atoms/button'
 import ClueInput from '../molecules/clue-input'
+import PageLoading from '../molecules/page-loading'
 import Chat from '../organism/chat'
 import GameBoard from '../organism/game-board'
 import GameTeamSection from '../organism/game-team-section'
@@ -17,7 +18,6 @@ export default function GameRoom() {
   const { socket, connected } = useSocketContext()
   const { token } = useTokenContext()
   const { roomId } = useParams() as { roomId: string }
-  const [isLoading, setIsLoading] = useState<boolean>(true)
 
   const [players, setPlayers] = useState<Player[]>([])
   const [roomState, setRoomState] = useState<RoomState | null>(null)
@@ -37,29 +37,18 @@ export default function GameRoom() {
         setRoomState(roomState)
       })
 
-      if (isLoading) {
-        socket.emit('joinRoom')
-        setIsLoading(false)
-      }
+      socket.emit('joinRoom')
 
       return () => {
-        // socket.off('roomState');
-        // socket.off('receiveMessage');
-        // socket.off('allowCheckin');
+        socket.off('roomPlayers')
+        socket.off('gameState')
+        socket.off('roomState')
       }
     }
-  }, [socket, connected, isLoading])
-
-  if (isLoading) {
-    return (
-      <>
-        <div>calma po</div>
-      </>
-    )
-  }
+  }, [socket, connected])
 
   if (!roomState || !gameState || !players) {
-    return <div>carregando</div>
+    return <PageLoading text='Obtendo dados da sala' />
   }
 
   return (
