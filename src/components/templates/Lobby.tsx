@@ -7,8 +7,8 @@ import { TbRefresh } from 'react-icons/tb'
 import { useTokenContext } from '../../context/token'
 import Button from '../atoms/button'
 import { Input } from '../atoms/input'
-import LoadingSpin from '../atoms/loading-spin'
 import AvatarSelector from '../molecules/avatar-selector'
+import TextButton from '../molecules/text-button'
 
 export default function Lobby() {
   const router = useRouter()
@@ -156,14 +156,14 @@ export default function Lobby() {
               <Input value={username} onchange={handleChangeUsername} />
             </label>
             <hr className='h-0 w-full border-t border-gray-300' />
-            <Button
+            <TextButton
+              title='Entrar'
               type='submit'
               className='w-full py-4'
               name='enterRoom'
+              isLoading={isLoading['registration']}
               disabled={isAnyLoading() || !username || selectedRoom < 0}
-            >
-              {isLoading['registration'] ? <LoadingSpin /> : 'Entrar'}
-            </Button>
+            />
             <div className='flex w-full items-center gap-2'>
               <hr className='h-0 w-full border-t border-gray-300' />
               <div className='text-gray-300'>ou</div>
@@ -173,14 +173,14 @@ export default function Lobby() {
               Nome da Sala
               <Input value={roomName} onchange={handleChangeRoomName} />
             </label>
-            <Button
+            <TextButton
+              title='Criar Sala'
               type='submit'
               className='w-full py-4'
               name='createRoom'
+              isLoading={isLoading['creation']}
               disabled={isAnyLoading() || !roomName || !username}
-            >
-              {isLoading['creation'] ? <LoadingSpin /> : 'Criar Sala'}
-            </Button>
+            />
           </form>
         </div>
       </div>

@@ -1,5 +1,8 @@
 import { LuLoader } from 'react-icons/lu'
 
-export default function LoadingSpin() {
-  return <LuLoader className='animate-spin' />
+type LoadingSpinProps = {
+  size?: number
+}
+export default function LoadingSpin({ size = 16 }: LoadingSpinProps) {
+  return <LuLoader size={size} className='animate-spin' />
 }

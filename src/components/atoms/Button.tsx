@@ -5,6 +5,7 @@ interface ButtonProps {
   disabled?: boolean
   type?: 'button' | 'submit' | 'reset'
   name?: string
+  isLoading?: boolean
 }
 
 export default function Button({
@@ -13,7 +14,8 @@ export default function Button({
   className,
   disabled,
   name,
-  type = 'button'
+  type = 'button',
+  isLoading = false
 }: ButtonProps) {
   if (disabled) {
     return (
@@ -34,7 +36,7 @@ export default function Button({
       className={`flex items-center justify-center rounded-lg border border-transparent bg-green-500 p-1 hover:bg-green-400 ${className}`}
       type={type}
       onClick={onClick}
-      disabled={disabled}
+      disabled={isLoading}
       name={name}
     >
       {children}
